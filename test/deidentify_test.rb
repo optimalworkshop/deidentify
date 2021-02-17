@@ -100,10 +100,10 @@ describe Deidentify do
     end
   end
 
-  describe "current value" do
+  describe "keep" do
     describe "for a string value" do
       before do
-        Bubble.deidentify :colour, method: :current_value
+        Bubble.deidentify :colour, method: :keep
       end
 
       it 'does not change the value' do
@@ -115,7 +115,7 @@ describe Deidentify do
 
     describe "for a number value" do
       before do
-        Bubble.deidentify :quantity, method: :current_value
+        Bubble.deidentify :quantity, method: :keep
       end
 
       let(:old_quantity) { 150 }

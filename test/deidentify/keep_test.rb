@@ -1,8 +1,8 @@
 require 'minitest/autorun'
-require 'deidentify/current_value'
+require 'deidentify/keep'
 
-describe Deidentify::CurrentValue do
-  let(:new_value) { Deidentify::CurrentValue.call(old_value) }
+describe Deidentify::Keep do
+  let(:new_value) { Deidentify::Keep.call(old_value) }
   let(:old_value) { "old" }
 
   it "returns the old value" do

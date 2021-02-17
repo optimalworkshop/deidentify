@@ -1,6 +1,6 @@
 require 'deidentify/replace'
 require 'deidentify/delete'
-require 'deidentify/current_value'
+require 'deidentify/keep'
 
 module Deidentify
   extend ::ActiveSupport::Concern
@@ -8,7 +8,7 @@ module Deidentify
   POLICY_MAP = {
     replace: Deidentify::Replace,
     delete: Deidentify::Delete,
-    current_value: Deidentify::CurrentValue,
+    keep: Deidentify::Keep,
   }
 
   class DeidentifyError < StandardError; end

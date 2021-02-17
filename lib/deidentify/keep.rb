@@ -1,5 +1,5 @@
 module Deidentify
-  class CurrentValue
+  class Keep
     def self.call(old_value)
       old_value
     end
