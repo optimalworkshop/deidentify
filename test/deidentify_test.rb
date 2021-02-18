@@ -21,6 +21,12 @@ describe Deidentify do
   let(:old_colour) { "blue" }
   let(:old_quantity) { 150 }
 
+  describe "the policy is invalid" do
+    it "raises an error" do
+      assert_raises(Deidentify::DeidentifyError) { Bubble.deidentify :colour, method: :pop }
+    end
+  end
+
   describe "will deidentify two columns" do
     before do
       Bubble.deidentify :colour, method: :delete
@@ -32,12 +38,6 @@ describe Deidentify do
 
       assert_nil bubble.colour
       assert_nil bubble.quantity
-    end
-  end
-
-  describe "there is no deidentify configuration" do
-    it "deidentify should fail" do
-      assert_raises(Deidentify::DeidentifyError, "There is no deidentification configuration for this class") { bubble.deidentify! }
     end
   end
 
