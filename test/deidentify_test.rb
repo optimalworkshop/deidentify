@@ -61,7 +61,6 @@ describe Deidentify do
         Bubble.deidentify :quantity, method: :replace, new_value: new_quantity
       end
 
-      let(:old_quantity) { 150 }
       let(:new_quantity) { 42 }
 
       it 'replaces the value' do
@@ -90,8 +89,6 @@ describe Deidentify do
         Bubble.deidentify :quantity, method: :delete
       end
 
-      let(:old_quantity) { 150 }
-
       it 'deletes the value' do
         bubble.deidentify!
 
@@ -118,12 +115,36 @@ describe Deidentify do
         Bubble.deidentify :quantity, method: :keep
       end
 
-      let(:old_quantity) { 150 }
-
       it 'does not change the value' do
         bubble.deidentify!
 
         assert_equal bubble.quantity, old_quantity
+      end
+    end
+  end
+
+  describe "lambda" do
+    describe "for a string value" do
+      before do
+        Bubble.deidentify :colour, method: -> (colour) { "#{colour} deidentified" }
+      end
+
+      it "returns the lambda result" do
+        bubble.deidentify!
+
+        assert_equal bubble.colour, "#{old_colour} deidentified"
+      end
+    end
+
+    describe "for a number value" do
+      before do
+        Bubble.deidentify :quantity, method: -> (quantity) { quantity*2 }
+      end
+
+      it "returns the lambda result" do
+        bubble.deidentify!
+
+        assert_equal bubble.quantity, old_quantity*2
       end
     end
   end
