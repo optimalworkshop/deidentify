@@ -6,7 +6,6 @@ Gem::Specification.new do |s|
   s.authors     = ["Lucy Dement"]
   s.files       = ["lib/deidentify.rb"]
 
-  s.required_rubygems_version = ">= 1.3.6"
-
-  s.add_development_dependency "byebug"
+  s.required_rubygems_version
+  s.add_runtime_dependency "rails", ">= 5.0.0"
 end
