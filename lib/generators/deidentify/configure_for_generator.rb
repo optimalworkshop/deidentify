@@ -47,7 +47,7 @@ module Deidentify
 
         path = path[0...-1].join("/") #remove the class name
 
-        "app/concern/deidentify/#{path}"
+        "app/concerns/deidentify/#{path}"
       end
 
       def klass
