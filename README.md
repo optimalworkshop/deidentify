@@ -72,6 +72,22 @@ This will replace the value with the provided value.
 deidentify :age, method: :replace, new_value: -1
 ```
 
+### Hash
+
+This will replace a string with a hashed version
+
+```ruby
+deidentify :name, method: :hash
+```
+
+There is a length option that will set the length of the hash.
+
+```ruby
+deidentify :name, method: :hash, length: 20
+```
+
+NOTE: This uses the SHA256 algorithm to hash. Truncating the length of this shouldn't reduce the security of the hashed value but it will increase the chance of collisions.
+
 ### Lambda
 
 You can pass a custom lambda as the deidentification method.

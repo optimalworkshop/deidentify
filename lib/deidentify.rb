@@ -1,6 +1,7 @@
 require 'deidentify/configuration'
 require 'deidentify/replace'
 require 'deidentify/delete'
+require 'deidentify/hash'
 require 'deidentify/keep'
 
 module Deidentify
@@ -19,6 +20,7 @@ module Deidentify
   POLICY_MAP = {
     replace: Deidentify::Replace,
     delete: Deidentify::Delete,
+    hash: Deidentify::Hash,
     keep: Deidentify::Keep,
   }
 
