@@ -44,6 +44,17 @@ person = Person.find(id)
 person.deidentify!
 ```
 
+### Secret Configuration
+
+For the hashing deidenitification methods you can configure this gem to take a secret which will be used to salt the hashed values.
+Do this by creating this file `config/initializers/deidentify.rb`
+
+```ruby
+Deidentify.configure do |config|
+  config.salt = # Your secret value
+end
+```
+
 ## Deidentification Methods
 ### Delete
 

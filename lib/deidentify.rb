@@ -1,8 +1,19 @@
+require 'deidentify/configuration'
 require 'deidentify/replace'
 require 'deidentify/delete'
 require 'deidentify/keep'
 
 module Deidentify
+  class << self
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    def configure
+      yield(configuration)
+    end
+  end
+
   extend ::ActiveSupport::Concern
 
   POLICY_MAP = {
