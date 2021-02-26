@@ -88,6 +88,22 @@ deidentify :name, method: :hash, length: 20
 
 NOTE: This uses the SHA256 algorithm to hash. Truncating the length of this shouldn't reduce the security of the hashed value but it will increase the chance of collisions.
 
+### Hash Email
+
+This will replace an email with a hashed version. This will hash the name and domain seperately creating a value of the format `hash@hash`.
+
+```ruby
+deidentify :email, method: :hash_email
+```
+
+There is a length option that will set the maximum length of the hashed email. NOTE: this can produce emails shorter than the length provided.
+
+```ruby
+deidentify :name, method: :hash_email, length: 20
+```
+
+NOTE: This also uses SHA256(see hash).
+
 ### Lambda
 
 You can pass a custom lambda as the deidentification method.

@@ -2,6 +2,7 @@ require 'deidentify/configuration'
 require 'deidentify/replace'
 require 'deidentify/delete'
 require 'deidentify/hash'
+require 'deidentify/hash_email'
 require 'deidentify/keep'
 
 module Deidentify
@@ -21,6 +22,7 @@ module Deidentify
     replace: Deidentify::Replace,
     delete: Deidentify::Delete,
     hash: Deidentify::Hash,
+    hash_email: Deidentify::HashEmail,
     keep: Deidentify::Keep,
   }
 

@@ -4,7 +4,7 @@ module Deidentify
       salt = Deidentify.configuration.salt
       hash = Digest::SHA256.hexdigest(old_value + salt)
 
-      if length.present?
+      if length.present? && length < hash.length
         hash = hash[0, length]
       end
 
