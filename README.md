@@ -104,6 +104,22 @@ deidentify :name, method: :hash_email, length: 20
 
 NOTE: This also uses SHA256(see hash).
 
+### Hash Url
+
+This will replace a url with a hashed version. This will hash the host, path, query and fragment strings seperately creating a value of the format `https://host/path?query#fragment`.
+
+```ruby
+deidentify :url, method: :hash_url
+```
+
+There is a length option that will set the maximum length of the hashed url. NOTE: this can produce urls shorter than the length provided.
+
+```ruby
+deidentify :url, method: :hash_url, length: 20
+```
+
+NOTE: This also uses SHA256(see hash).
+
 ### Lambda
 
 You can pass a custom lambda as the deidentification method.

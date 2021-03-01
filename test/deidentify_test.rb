@@ -1,6 +1,7 @@
 require 'minitest/autorun'
 require 'active_support'
 require 'active_record'
+require 'mocha/minitest'
 
 require 'deidentify'
 
@@ -209,6 +210,38 @@ describe Deidentify do
         bubble.deidentify!
 
         assert bubble.colour != old_colour
+      end
+    end
+  end
+
+  describe "hash_url" do
+    let(:new_url) { "url" }
+
+    describe "with length" do
+      before do
+        Bubble.deidentify :colour, method: :hash_url, length: length
+      end
+
+      let(:length) { 21 }
+
+      it "returns a hashed url" do
+        Deidentify::HashUrl.expects(:call).with(old_colour, length: length).returns(new_url)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_url
+      end
+    end
+
+    describe "with no length" do
+      before do
+        Bubble.deidentify :colour, method: :hash_url
+      end
+
+      it "returns a hashed url" do
+        Deidentify::HashUrl.expects(:call).with(old_colour, {}).returns(new_url)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_url
       end
     end
   end
