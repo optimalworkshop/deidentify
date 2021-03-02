@@ -15,7 +15,7 @@ blocks:
           commands:
             - checkout
             - sem-version ruby 2.6.5
-            - cache restore
+            - cache restore gems-$SEMAPHORE_GIT_BRANCH-$(checksum Gemfile.lock),gems-$SEMAPHORE_GIT_BRANCH-,gems-master-
             - bundle install --deployment --path vendor/bundle
             - cache store
             - bundle exec rake test
