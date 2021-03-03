@@ -1,9 +1,4 @@
-require 'minitest/autorun'
-require 'active_support'
-require 'active_record'
-require 'mocha/minitest'
-
-require 'deidentify'
+require 'test_helper'
 
 describe Deidentify do
   class Bubble < ActiveRecord::Base
@@ -24,7 +19,7 @@ describe Deidentify do
 
   describe "the policy is invalid" do
     it "raises an error" do
-      assert_raises(Deidentify::DeidentifyError) { Bubble.deidentify :colour, method: :pop }
+      assert_raises(Deidentify::Error) { Bubble.deidentify :colour, method: :pop }
     end
   end
 

@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'deidentify/keep'
+require 'test_helper'
 
 describe Deidentify::Keep do
   let(:new_value) { Deidentify::Keep.call(old_value) }

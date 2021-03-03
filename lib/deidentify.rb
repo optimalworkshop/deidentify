@@ -5,6 +5,7 @@ require 'deidentify/hash'
 require 'deidentify/hash_email'
 require 'deidentify/hash_url'
 require 'deidentify/keep'
+require 'deidentify/error'
 
 module Deidentify
   class << self
@@ -28,12 +29,10 @@ module Deidentify
     keep: Deidentify::Keep,
   }
 
-  class DeidentifyError < StandardError; end
-
   module ClassMethods
     def deidentify(column, method:, **options)
       unless POLICY_MAP.keys.include?(method) || method.respond_to?(:call)
-        raise DeidentifyError.new("you must specify a valid deidentification method")
+        raise Deidentify::Error.new("you must specify a valid deidentification method")
       end
 
       if !respond_to?(:deidentify_configuration)
@@ -47,7 +46,7 @@ module Deidentify
 
   def deidentify!
     if !respond_to?(:deidentify_configuration)
-      raise DeidentifyError.new("There is no deidentification configuration for this class")
+      raise Deidentify::Error.new("There is no deidentification configuration for this class")
     end
 
     ActiveRecord::Base.transaction do

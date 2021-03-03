@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'deidentify/hash_url'
-require 'mocha/minitest'
+require 'test_helper'
 
 describe Deidentify::HashUrl do
   let(:new_url) { Deidentify::HashUrl.call(old_url) }

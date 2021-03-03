@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'deidentify/hash'
-require 'mocha/minitest'
+require 'test_helper'
 
 describe Deidentify::Hash do
   let(:new_value) { Deidentify::Hash.call(old_value) }
@@ -13,7 +11,7 @@ describe Deidentify::Hash do
   describe "calls the hashing service" do
     it "with the salt" do
       # salt value set in the configuration file
-      Digest::SHA256.expects(:hexdigest).with(old_value + "ewnvi3").returns("new")
+      Digest::SHA256.expects(:hexdigest).with(old_value + "default").returns("new")
 
       assert_equal new_value, "new"
     end

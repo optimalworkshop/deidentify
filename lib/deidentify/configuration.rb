@@ -3,7 +3,7 @@ module Deidentify
     attr_accessor :salt
 
     def initialize
-      @salt = "ewnvi3"
+      @salt = nil
     end
   end
 end

@@ -1,6 +1,4 @@
-require 'minitest/autorun'
-require 'deidentify/hash_email'
-require 'mocha/minitest'
+require 'test_helper'
 
 describe Deidentify::HashEmail do
   let(:new_email) { Deidentify::HashEmail.call(old_email) }
