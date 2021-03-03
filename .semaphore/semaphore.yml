@@ -1,0 +1,22 @@
+version: v1.0
+name: Deidentify test suite
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Tests
+    task:
+      env_vars:
+        - name: RAILS_ENV
+          value: test
+      jobs:
+        - name: Tests
+          commands:
+            - checkout
+            - sem-version ruby 2.6.5
+            - cache restore gems-$SEMAPHORE_GIT_BRANCH-$(checksum Gemfile.lock),gems-$SEMAPHORE_GIT_BRANCH-,gems-master-
+            - bundle install --deployment --path vendor/bundle
+            - cache delete gems-$SEMAPHORE_GIT_BRANCH-$(checksum Gemfile.lock)
+            - cache store gems-$SEMAPHORE_GIT_BRANCH-$(checksum Gemfile.lock) vendor/bundle
+            - bundle exec rake test
