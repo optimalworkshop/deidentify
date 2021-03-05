@@ -1,8 +1,4 @@
-require 'minitest/autorun'
-require 'active_support'
-require 'active_record'
-
-require 'deidentify'
+require 'test_helper'
 
 describe Deidentify do
   class Bubble < ActiveRecord::Base
@@ -18,12 +14,12 @@ describe Deidentify do
   end
 
   let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
-  let(:old_colour) { "blue" }
+  let(:old_colour) { "blue@eiffel65.com" }
   let(:old_quantity) { 150 }
 
   describe "the policy is invalid" do
     it "raises an error" do
-      assert_raises(Deidentify::DeidentifyError) { Bubble.deidentify :colour, method: :pop }
+      assert_raises(Deidentify::Error) { Bubble.deidentify :colour, method: :pop }
     end
   end
 
@@ -145,6 +141,102 @@ describe Deidentify do
         bubble.deidentify!
 
         assert_equal bubble.quantity, old_quantity*2
+      end
+    end
+  end
+
+  describe "hash" do
+    let(:new_hash) { "colourless" }
+
+    describe "with length" do
+      before do
+        Bubble.deidentify :colour, method: :hash, length: length
+      end
+
+      let(:length) { 20 }
+
+      it "returns a hashed value" do
+        Deidentify::Hash.expects(:call).with(old_colour, length: length).returns(new_hash)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_hash
+      end
+    end
+
+    describe "with no length" do
+      before do
+        Bubble.deidentify :colour, method: :hash
+      end
+
+      it "returns a hashed value" do
+        Deidentify::Hash.expects(:call).with(old_colour, {}).returns(new_hash)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_hash
+      end
+    end
+  end
+
+  describe "hash_email" do
+    let(:new_email) { "unknown" }
+
+    describe "with length" do
+      before do
+        Bubble.deidentify :colour, method: :hash_email, length: length
+      end
+
+      let(:length) { 21 }
+
+      it "returns a hashed email" do
+        Deidentify::HashEmail.expects(:call).with(old_colour, length: length).returns(new_email)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_email
+      end
+    end
+
+    describe "with no length" do
+      before do
+        Bubble.deidentify :colour, method: :hash_email
+      end
+
+      it "returns a hashed email" do
+        Deidentify::HashEmail.expects(:call).with(old_colour, {}).returns(new_email)
+        bubble.deidentify!
+
+        assert bubble.colour != old_colour
+      end
+    end
+  end
+
+  describe "hash_url" do
+    let(:new_url) { "url" }
+
+    describe "with length" do
+      before do
+        Bubble.deidentify :colour, method: :hash_url, length: length
+      end
+
+      let(:length) { 21 }
+
+      it "returns a hashed url" do
+        Deidentify::HashUrl.expects(:call).with(old_colour, length: length).returns(new_url)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_url
+      end
+    end
+
+    describe "with no length" do
+      before do
+        Bubble.deidentify :colour, method: :hash_url
+      end
+
+      it "returns a hashed url" do
+        Deidentify::HashUrl.expects(:call).with(old_colour, {}).returns(new_url)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_url
       end
     end
   end

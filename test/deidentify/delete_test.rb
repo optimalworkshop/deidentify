@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'deidentify/delete'
+require 'test_helper'
 
 describe Deidentify::Delete do
   let(:new_value) { Deidentify::Delete.call("old") }

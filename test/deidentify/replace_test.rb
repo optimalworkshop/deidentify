@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'deidentify/replace'
+require 'test_helper'
 
 describe Deidentify::Replace do
   let(:new_value) { Deidentify::Replace.call("old", new_value: replacement) }

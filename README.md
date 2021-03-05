@@ -44,6 +44,17 @@ person = Person.find(id)
 person.deidentify!
 ```
 
+### Secret Configuration
+
+For the hashing deidenitification methods you can configure this gem to take a secret which will be used to salt the hashed values.
+Do this by creating this file `config/initializers/deidentify.rb`
+
+```ruby
+Deidentify.configure do |config|
+  config.salt = # Your secret value
+end
+```
+
 ## Deidentification Methods
 ### Delete
 
@@ -60,6 +71,54 @@ This will replace the value with the provided value.
 ```ruby
 deidentify :age, method: :replace, new_value: -1
 ```
+
+### Hash
+
+This will replace a string with a hashed version
+
+```ruby
+deidentify :name, method: :hash
+```
+
+There is a length option that will set the length of the hash.
+
+```ruby
+deidentify :name, method: :hash, length: 20
+```
+
+NOTE: This uses the SHA256 algorithm to hash. Truncating the length of this shouldn't reduce the security of the hashed value but it will increase the chance of collisions.
+
+### Hash Email
+
+This will replace an email with a hashed version. This will hash the name and domain seperately creating a value of the format `hash@hash`.
+
+```ruby
+deidentify :email, method: :hash_email
+```
+
+There is a length option that will set the maximum length of the hashed email. NOTE: this can produce emails shorter than the length provided.
+
+```ruby
+deidentify :name, method: :hash_email, length: 20
+```
+
+NOTE: This also uses SHA256(see hash).
+
+### Hash Url
+
+This will replace a url with a hashed version. This will hash the host, path, query and fragment strings seperately creating a value of the format `https://host/path?query#fragment`.
+
+```ruby
+deidentify :url, method: :hash_url
+```
+
+There is a length option that will set the maximum length of the hashed url. NOTE: this can produce urls shorter than the length provided.
+
+```ruby
+deidentify :url, method: :hash_url, length: 20
+```
+
+NOTE: This also uses SHA256(see hash).
 
 ### Lambda
 
