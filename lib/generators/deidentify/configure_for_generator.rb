@@ -1,4 +1,5 @@
 require 'rails/generators'
+require 'deidentify'
 
 module Deidentify
   module Generators
