@@ -1,6 +1,8 @@
 module Deidentify
   class Hash
     def self.call(old_value, length: nil)
+      return nil if old_value.nil?
+
       salt = Deidentify.configuration.salt
 
       if salt.blank?

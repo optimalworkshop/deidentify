@@ -49,4 +49,12 @@ describe Deidentify::HashEmail do
       end
     end
   end
+
+  describe "the email is nil" do
+    let(:old_email) { nil }
+
+    it "returns nil" do
+      assert_nil new_email
+    end
+  end
 end

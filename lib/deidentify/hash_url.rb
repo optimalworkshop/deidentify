@@ -1,6 +1,8 @@
 module Deidentify
   class HashUrl
     def self.call(old_url, length: 255)
+      return nil if old_url.nil?
+
       uri = URI.parse(old_url)
 
       hash_length = calculate_hash_length(uri, length)
