@@ -61,4 +61,12 @@ describe Deidentify::HashUrl do
       assert new_url.length == (7 * 4 + 11)
     end
   end
+
+  describe "the url is nil" do
+    let(:old_url) { nil }
+
+    it "returns nil" do
+      assert_nil new_url
+    end
+  end
 end

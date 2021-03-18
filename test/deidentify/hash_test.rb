@@ -34,4 +34,12 @@ describe Deidentify::Hash do
       end
     end
   end
+
+  describe "when the value is nil" do
+    let(:old_value) { nil }
+
+    it "returns nil" do
+      assert_nil new_value
+    end
+  end
 end
