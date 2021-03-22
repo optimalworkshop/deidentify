@@ -43,6 +43,15 @@ describe Deidentify::HashUrl do
     end
   end
 
+  describe "when there is no protocol" do
+    let(:old_url) { "www.wardrobe.com" }
+
+    it "adds the protocol http" do
+      Deidentify::Hash.expects(:call).with("www.wardrobe.com", length: 244).returns("host")
+      assert_equal new_url, "http://host"
+    end
+  end
+
   describe "when a length is provided" do
     let(:new_url) { Deidentify::HashUrl.call(old_url, length: length) }
     let(:old_url) { "https://wardrobe.com/path/to/narnia?id=2&name=edmund#white-witchs-castle" }
