@@ -120,6 +120,20 @@ deidentify :url, method: :hash_url, length: 20
 
 NOTE: This also uses SHA256(see hash).
 
+### Delocalize IP
+
+This will replace an IP address with its network address turning the last bits to 0s depending on the network mask (by default 24 bits for IPv4 and 48 bits for IPv6).
+
+```ruby
+deidentify :ip, method: :delocalize_ip
+```
+
+The length of the mask can be provided as parameter
+
+```ruby
+deidentify :ip, method: :delocalize_ip, mask_length: 16
+```
+
 ### Lambda
 
 You can pass a custom lambda as the deidentification method.

@@ -4,6 +4,7 @@ require 'deidentify/delete'
 require 'deidentify/hash'
 require 'deidentify/hash_email'
 require 'deidentify/hash_url'
+require 'deidentify/delocalize_ip'
 require 'deidentify/keep'
 require 'deidentify/error'
 
@@ -27,6 +28,7 @@ module Deidentify
     hash_email: Deidentify::HashEmail,
     hash_url: Deidentify::HashUrl,
     keep: Deidentify::Keep,
+    delocalize_ip: Deidentify::DelocalizeIp,
   }
 
   module ClassMethods

@@ -240,4 +240,36 @@ describe Deidentify do
       end
     end
   end
+
+  describe "delocalize_ip" do
+    let(:new_ip) { "ip address" }
+
+    describe "with mask length" do
+      before do
+        Bubble.deidentify :colour, method: :delocalize_ip, mask_length: mask_length
+      end
+
+      let(:mask_length) { 16 }
+
+      it "returns a delocalized ip" do
+        Deidentify::DelocalizeIp.expects(:call).with(old_colour, mask_length: mask_length).returns(new_ip)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_ip
+      end
+    end
+
+    describe "with no mask length" do
+      before do
+        Bubble.deidentify :colour, method: :delocalize_ip
+      end
+
+      it "returns a delocalized ip" do
+        Deidentify::DelocalizeIp.expects(:call).with(old_colour, {}).returns(new_ip)
+        bubble.deidentify!
+
+        assert_equal bubble.colour, new_ip
+      end
+    end
+  end
 end
