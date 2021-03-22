@@ -4,6 +4,7 @@ module Deidentify
       return nil if old_url.nil?
 
       uri = URI.parse(old_url)
+      uri = URI.parse("http://#{old_url}") if uri.scheme.nil?
 
       hash_length = calculate_hash_length(uri, length)
 
