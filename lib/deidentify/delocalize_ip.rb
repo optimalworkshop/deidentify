@@ -4,7 +4,7 @@ module Deidentify
       return nil if old_ip.nil?
 
       addr = IPAddr.new(old_ip)
-      return addr.mask(mask_length || default_mask(addr)).to_s
+      addr.mask(mask_length || default_mask(addr)).to_s
     end
 
     private
