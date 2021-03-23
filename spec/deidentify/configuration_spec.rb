@@ -1,31 +1,30 @@
-require 'minitest/autorun'
-require 'mocha/minitest'
 require 'active_support'
 require 'active_record'
 require 'deidentify'
+require 'rspec'
 
 describe Deidentify::Configuration do
-  describe "when the gem isn't configured" do
+  context "when the gem isn't configured" do
     before do
-      Deidentify.configuration.expects(:salt).returns(nil)
+      expect(Deidentify.configuration).to receive(:salt).and_return(nil)
     end
 
     it "the hash method raises an error" do
-      assert_raises(Deidentify::Error) do
+      expect {
         Deidentify::Hash.call("dawn")
-      end
+      }.to raise_error(Deidentify::Error)
     end
 
     it "the hash email method raises an error" do
-      assert_raises(Deidentify::Error) do
+      expect {
         Deidentify::HashEmail.call("leaf.green@kanto.com")
-      end
+      }.to raise_error(Deidentify::Error)
     end
 
     it "the hash url method raises an error" do
-      assert_raises(Deidentify::Error) do
+      expect {
         Deidentify::HashUrl.call("https://oaklabs.com")
-      end
+      }.to raise_error(Deidentify::Error)
     end
   end
 end

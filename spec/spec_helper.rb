@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require 'mocha/minitest'
+require 'rspec'
 require 'active_support'
 require 'active_record'
 require 'deidentify'
