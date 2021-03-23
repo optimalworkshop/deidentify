@@ -156,7 +156,7 @@ NOTE: You get the same behaviour by simply not specifing a deidentification meth
 
 ## Generator
 
-This gem comes with a generator that will generate a deidentification module for a model. By calling
+This gem comes with a generator that will generate a deidentification policy module for a model. By calling
 
 ```
 $ rails generate deidentify:configure_for Person
@@ -165,7 +165,7 @@ $ rails generate deidentify:configure_for Person
 you will generate a module in `app/concerns/deidentify/` which will contain all columns of that model.
 
 ```ruby
-module Deidentify::Person
+module Deidentify::PersonPolicy
   extend ActiveSupport::Concern
   include Deidentify
 
@@ -182,7 +182,7 @@ It will also include this module in the model directly after the class declarati
 
 ```ruby
 class Person < ApplicationRecord
-  include Deidentify::Person
+  include Deidentify::PersonPolicy
   ...
 end
 ```
@@ -198,7 +198,7 @@ $ rails generate deidentify::configure_for Billing::Payment
 This will generate the module in `app/concerns/deidentify/billing/`
 
 ```ruby
-module Deidentify::Billing::Payment
+module Deidentify::Billing::PaymentPolicy
   ...
 end
 ```
@@ -207,7 +207,7 @@ And will add the module in the correct class
 
 ```ruby
 class Billing::Payment < ApplicationRecord
-  include Deidentify::Billing::Payment
+  include Deidentify::Billing::PaymentPolicy
   ...
 end
 ```
@@ -226,7 +226,7 @@ NOTE: the path provided must be the portion after `models`
 This will generate a module at `app/concerns/deidentify/billing/`
 
 ```ruby
-module Deidentify::Billing::Payment
+module Deidentify::Billing::PaymentPolicy
   ...
 end
 ```
@@ -235,7 +235,7 @@ And will add the module into the model found at the path specified
 
 ```ruby
 class Payment < ApplicationRecord
-  include Deidentify::Billing::Payment
+  include Deidentify::Billing::PaymentPolicy
   ...
 end
 ```
