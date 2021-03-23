@@ -30,6 +30,10 @@ module Deidentify
     keep: Deidentify::Keep,
     delocalize_ip: Deidentify::DelocalizeIp,
   }
+  included do
+    class_attribute :deidentify_configuration
+    self.deidentify_configuration = {}
+  end
 
   module ClassMethods
     def deidentify(column, method:, **options)
@@ -37,20 +41,11 @@ module Deidentify
         raise Deidentify::Error.new("you must specify a valid deidentification method")
       end
 
-      if !respond_to?(:deidentify_configuration)
-        class_attribute :deidentify_configuration
-        self.deidentify_configuration = {}
-      end
-
       deidentify_configuration[column] = [method, options]
     end
   end
 
   def deidentify!
-    if !respond_to?(:deidentify_configuration)
-      raise Deidentify::Error.new("There is no deidentification configuration for this class")
-    end
-
     ActiveRecord::Base.transaction do
       self.deidentify_configuration.each_pair do |col, config|
         policy, options = Array(config)

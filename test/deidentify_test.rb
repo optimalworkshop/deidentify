@@ -17,6 +17,14 @@ describe Deidentify do
   let(:old_colour) { "blue@eiffel65.com" }
   let(:old_quantity) { 150 }
 
+  describe "no policy is defined" do
+    it "ignores all columns" do
+      bubble.deidentify!
+      assert_equal bubble.colour, old_colour
+      assert_equal bubble.quantity, old_quantity
+    end
+  end
+
   describe "the policy is invalid" do
     it "raises an error" do
       assert_raises(Deidentify::Error) { Bubble.deidentify :colour, method: :pop }
