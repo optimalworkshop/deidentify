@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    deidentify (0.0.3)
+    deidentify (0.0.4)
       rails (>= 5.0.0)
 
 GEM
