@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Deidentify::<%= namespace_model %>
+module Deidentify::<%= namespace_model %>Policy
   extend ActiveSupport::Concern
   include Deidentify
 

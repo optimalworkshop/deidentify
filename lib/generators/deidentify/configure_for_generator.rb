@@ -8,11 +8,11 @@ module Deidentify
       class_option :file_path, type: :string, default: ""
 
       def call
-        template "module_template.rb", File.join(module_path,  "#{klass.underscore}.rb")
+        template "module_template.rb", File.join(module_path,  "#{klass.underscore}_policy.rb")
 
         insert_into_file(
           model_path,
-          "\n  include Deidentify::#{namespace_model}",
+          "\n  include Deidentify::#{namespace_model}Policy",
           after: "#{klass} < ApplicationRecord"
         )
       end
