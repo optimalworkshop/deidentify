@@ -19,4 +19,4 @@ blocks:
             - bundle install --deployment --path vendor/bundle
             - cache delete gems-$SEMAPHORE_GIT_BRANCH-$(checksum Gemfile.lock)
             - cache store gems-$SEMAPHORE_GIT_BRANCH-$(checksum Gemfile.lock) vendor/bundle
-            - bundle exec rake test
+            - bundle exec rake spec

@@ -1,9 +1,9 @@
-require 'test_helper'
+require 'spec_helper'
 
 describe Deidentify::Delete do
   let(:new_value) { Deidentify::Delete.call("old") }
 
   it "returns nil" do
-    assert_nil new_value
+    expect(new_value).to be_nil
   end
 end

@@ -1,10 +1,9 @@
-require 'rake/testtask'
+require "rake"
+require "rspec/core/rake_task"
 
-Rake::TestTask.new do |t|
-  t.libs << "test"
-  t.libs << "lib"
-  t.test_files = FileList["test/**/*_test.rb"]
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.pattern = Dir.glob("spec/**/*_spec.rb")
+  t.rspec_opts = "--format documentation"
 end
 
-desc "Run tests"
-task :default => :test
+task default: :spec
