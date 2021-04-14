@@ -218,7 +218,7 @@ You can specify a file path if your path doesn't match your namespace.
 For example if you have a model `Payment` which is found in `app/models/billing/payment.rb`
 
 ```
-$ rails generate deidentify::configure_for Payment --file_path billing
+$ rails generate deidentify::configure_for Payment --file_path billing/payment
 ```
 
 NOTE: the path provided must be the portion after `models`
