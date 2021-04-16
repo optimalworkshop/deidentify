@@ -9,10 +9,10 @@ describe Deidentify::HashUrl do
   end
 
   it "calls the hashing services" do
-    expect(Deidentify::Hash).to receive(:call).with("wardrobe.com", length: 61).and_return("host")
-    expect(Deidentify::Hash).to receive(:call).with("path/to/narnia", length: 61).and_return("path")
-    expect(Deidentify::Hash).to receive(:call).with("id=2&name=edmund", length: 61).and_return("query")
-    expect(Deidentify::Hash).to receive(:call).with("white-witchs-castle", length: 61).and_return("fragment")
+    expect(Deidentify::BaseHash).to receive(:call).with("wardrobe.com", length: 61).and_return("host")
+    expect(Deidentify::BaseHash).to receive(:call).with("path/to/narnia", length: 61).and_return("path")
+    expect(Deidentify::BaseHash).to receive(:call).with("id=2&name=edmund", length: 61).and_return("query")
+    expect(Deidentify::BaseHash).to receive(:call).with("white-witchs-castle", length: 61).and_return("fragment")
 
     expect(new_url).to eq("https://host/path?query#fragment")
   end
@@ -25,7 +25,7 @@ describe Deidentify::HashUrl do
     end
 
     it "only calls the hashing service once" do
-      expect(Deidentify::Hash).to receive(:call).with("wardrobe.com", length: 244).and_return("host")
+      expect(Deidentify::BaseHash).to receive(:call).with("wardrobe.com", length: 244).and_return("host")
 
       expect(new_url).to eq("https://host")
     end
@@ -35,9 +35,9 @@ describe Deidentify::HashUrl do
     let(:old_url) { "https://wardrobe.com/path/to/narnia?id=2&name=edmund" }
 
     it "adjusts the length accordingly" do
-      expect(Deidentify::Hash).to receive(:call).with("wardrobe.com", length: 81).and_return("host")
-      expect(Deidentify::Hash).to receive(:call).with("path/to/narnia", length: 81).and_return("path")
-      expect(Deidentify::Hash).to receive(:call).with("id=2&name=edmund", length: 81).and_return("query")
+      expect(Deidentify::BaseHash).to receive(:call).with("wardrobe.com", length: 81).and_return("host")
+      expect(Deidentify::BaseHash).to receive(:call).with("path/to/narnia", length: 81).and_return("path")
+      expect(Deidentify::BaseHash).to receive(:call).with("id=2&name=edmund", length: 81).and_return("query")
 
       expect(new_url).to eq("https://host/path?query")
     end
@@ -47,7 +47,7 @@ describe Deidentify::HashUrl do
     let(:old_url) { "www.wardrobe.com" }
 
     it "adds the protocol http" do
-      expect(Deidentify::Hash).to receive(:call).with("www.wardrobe.com", length: 244).and_return("host")
+      expect(Deidentify::BaseHash).to receive(:call).with("www.wardrobe.com", length: 244).and_return("host")
       expect(new_url).to eq("http://host")
     end
   end
@@ -58,10 +58,10 @@ describe Deidentify::HashUrl do
     let(:length) { 42 }
 
     it "adjusts the length accordingly" do
-      expect(Deidentify::Hash).to receive(:call).with("wardrobe.com", length: 7).and_return("host")
-      expect(Deidentify::Hash).to receive(:call).with("path/to/narnia", length: 7).and_return("path")
-      expect(Deidentify::Hash).to receive(:call).with("id=2&name=edmund", length: 7).and_return("query")
-      expect(Deidentify::Hash).to receive(:call).with("white-witchs-castle", length: 7).and_return("fragment")
+      expect(Deidentify::BaseHash).to receive(:call).with("wardrobe.com", length: 7).and_return("host")
+      expect(Deidentify::BaseHash).to receive(:call).with("path/to/narnia", length: 7).and_return("path")
+      expect(Deidentify::BaseHash).to receive(:call).with("id=2&name=edmund", length: 7).and_return("query")
+      expect(Deidentify::BaseHash).to receive(:call).with("white-witchs-castle", length: 7).and_return("fragment")
 
       expect(new_url).to eq("https://host/path?query#fragment")
     end

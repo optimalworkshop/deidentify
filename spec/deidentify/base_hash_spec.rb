@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Deidentify::Hash do
-  let(:new_value) { Deidentify::Hash.call(old_value) }
+describe Deidentify::BaseHash do
+  let(:new_value) { Deidentify::BaseHash.call(old_value) }
   let(:old_value) { "old" }
 
   it "returns a value that isn't the old one" do
@@ -18,7 +18,7 @@ describe Deidentify::Hash do
   end
 
   context "when the length is provided" do
-    let(:new_value) { Deidentify::Hash.call(old_value, length: length) }
+    let(:new_value) { Deidentify::BaseHash.call(old_value, length: length) }
     let(:length) { 10 }
 
     it "truncates the hashed value" do

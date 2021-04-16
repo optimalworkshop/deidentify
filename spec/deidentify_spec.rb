@@ -167,7 +167,7 @@ describe Deidentify do
       let(:length) { 20 }
 
       it "returns a hashed value" do
-        expect(Deidentify::Hash).to receive(:call).with(old_colour, length: length).and_return(new_hash)
+        expect(Deidentify::BaseHash).to receive(:call).with(old_colour, length: length).and_return(new_hash)
         bubble.deidentify!
 
         expect(bubble.colour).to eq(new_hash)
@@ -180,7 +180,7 @@ describe Deidentify do
       end
 
       it "returns a hashed value" do
-        expect(Deidentify::Hash).to receive(:call).with(old_colour, any_args).and_return(new_hash)
+        expect(Deidentify::BaseHash).to receive(:call).with(old_colour, any_args).and_return(new_hash)
         bubble.deidentify!
 
         expect(bubble.colour).to eq(new_hash)

@@ -8,12 +8,12 @@ module Deidentify
 
       hash_length = calculate_hash_length(uri, length)
 
-      uri.host = Deidentify::Hash.call(uri.host, length: hash_length)
+      uri.host = Deidentify::BaseHash.call(uri.host, length: hash_length)
       if uri.path.present?
-        uri.path = "/#{ Deidentify::Hash.call(remove_slash(uri.path), length: hash_length) }"
+        uri.path = "/#{ Deidentify::BaseHash.call(remove_slash(uri.path), length: hash_length) }"
       end
-      uri.query = Deidentify::Hash.call(uri.query, length: hash_length) if uri.query.present?
-      uri.fragment = Deidentify::Hash.call(uri.fragment, length: hash_length) if uri.fragment.present?
+      uri.query = Deidentify::BaseHash.call(uri.query, length: hash_length) if uri.query.present?
+      uri.fragment = Deidentify::BaseHash.call(uri.fragment, length: hash_length) if uri.fragment.present?
 
       uri.to_s
     end
