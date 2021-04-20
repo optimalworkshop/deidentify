@@ -14,11 +14,11 @@ describe Deidentify::HashEmail do
 
   context "it calls the hashing service" do
     it "calls the hashing service and prunes the domain length" do
-      expect(Deidentify::Hash).to receive(:call).with(
+      expect(Deidentify::BaseHash).to receive(:call).with(
         "harry.potter",
         length: 127
       ).and_return("voldemort")
-      expect(Deidentify::Hash).to receive(:call).with(
+      expect(Deidentify::BaseHash).to receive(:call).with(
         "hogwarts.com",
         length: Deidentify::HashEmail::MAX_DOMAIN_LENGTH
       ).and_return("deatheaters.com")
@@ -33,8 +33,8 @@ describe Deidentify::HashEmail do
         let(:length) { 10 }
 
         it "calls the hashing service with the correct length" do
-          expect(Deidentify::Hash).to receive(:call).with("harry.potter", length: 4).and_return("voldemort")
-          expect(Deidentify::Hash).to receive(:call).with("hogwarts.com", length: 4).and_return("deatheaters.com")
+          expect(Deidentify::BaseHash).to receive(:call).with("harry.potter", length: 4).and_return("voldemort")
+          expect(Deidentify::BaseHash).to receive(:call).with("hogwarts.com", length: 4).and_return("deatheaters.com")
 
           expect(new_email).to eq("voldemort@deatheaters.com")
         end

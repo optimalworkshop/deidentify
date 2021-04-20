@@ -10,8 +10,8 @@ module Deidentify
 
       name, domain = old_email.split('@')
 
-      hashed_name = Deidentify::Hash.call(name, length: half_length)
-      hashed_domain = Deidentify::Hash.call(domain, length: [half_length, MAX_DOMAIN_LENGTH].min)
+      hashed_name = Deidentify::BaseHash.call(name, length: half_length)
+      hashed_domain = Deidentify::BaseHash.call(domain, length: [half_length, MAX_DOMAIN_LENGTH].min)
 
       "#{hashed_name}@#{hashed_domain}"
     end

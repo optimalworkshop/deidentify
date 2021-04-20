@@ -1,7 +1,7 @@
 require 'deidentify/configuration'
 require 'deidentify/replace'
 require 'deidentify/delete'
-require 'deidentify/hash'
+require 'deidentify/base_hash'
 require 'deidentify/hash_email'
 require 'deidentify/hash_url'
 require 'deidentify/delocalize_ip'
@@ -24,7 +24,7 @@ module Deidentify
   POLICY_MAP = {
     replace: Deidentify::Replace,
     delete: Deidentify::Delete,
-    hash: Deidentify::Hash,
+    hash: Deidentify::BaseHash,
     hash_email: Deidentify::HashEmail,
     hash_url: Deidentify::HashUrl,
     keep: Deidentify::Keep,

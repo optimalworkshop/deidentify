@@ -11,7 +11,7 @@ describe Deidentify::Configuration do
 
     it "the hash method raises an error" do
       expect {
-        Deidentify::Hash.call("dawn")
+        Deidentify::BaseHash.call("dawn")
       }.to raise_error(Deidentify::Error)
     end
 

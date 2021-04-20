@@ -1,5 +1,5 @@
 module Deidentify
-  class Hash
+  class BaseHash
     def self.call(old_value, length: nil)
       return nil if old_value.nil?
 
