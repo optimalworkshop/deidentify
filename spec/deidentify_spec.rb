@@ -76,6 +76,47 @@ describe Deidentify do
         expect(bubble.quantity).to eq(new_quantity)
       end
     end
+
+    context "for a nil value" do
+      let(:old_colour) { nil }
+      let(:new_colour) { "iridescent" }
+
+      context "by default" do
+        before do
+          Bubble.deidentify :colour, method: :replace, new_value: new_colour
+        end
+
+        it "keeps the nil" do
+          bubble.deidentify!
+
+          expect(bubble.colour).to be_nil
+        end
+      end
+
+      context "when nil should be kept" do
+        before do
+          Bubble.deidentify :colour, method: :replace, new_value: new_colour, keep_nil: true
+        end
+
+        it "keeps the nil" do
+          bubble.deidentify!
+
+          expect(bubble.colour).to be_nil
+        end
+      end
+
+      context "when nil should be replaced" do
+        before do
+          Bubble.deidentify :colour, method: :replace, new_value: new_colour, keep_nil: false
+        end
+
+        it 'replaces the value' do
+          bubble.deidentify!
+
+          expect(bubble.colour).to eq(new_colour)
+        end
+      end
+    end
   end
 
   describe "delete" do
