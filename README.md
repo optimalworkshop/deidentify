@@ -71,6 +71,11 @@ This will replace the value with the provided value.
 ```ruby
 deidentify :age, method: :replace, new_value: -1
 ```
+There is a keep nil option that will determine if nils are replaced. By default this is set to `true` which means `nil` will not be replaced with the `new_value`. Setting this to false will mean that `nil` will be replaced with the `new_value`.
+
+```ruby
+deidentify :age, method: :replace, new_value: -1, keep_nil: false
+```
 
 ### Hash
 
