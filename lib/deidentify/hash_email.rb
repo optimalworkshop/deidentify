@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Deidentify
   class HashEmail
     # 63 is the longest domain that is still acceptable for URI::MailTo::EMAILS_REGEXP
@@ -6,7 +8,7 @@ module Deidentify
     def self.call(old_email, length: 255)
       return nil if old_email.nil?
 
-      half_length = (length - 1)/2 # the -1 is to account for the @ symbol
+      half_length = (length - 1) / 2 # the -1 is to account for the @ symbol
 
       name, domain = old_email.split('@')
 

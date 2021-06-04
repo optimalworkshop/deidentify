@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_support'
 require 'active_record'
 require 'deidentify'
@@ -9,22 +11,22 @@ describe Deidentify::Configuration do
       expect(Deidentify.configuration).to receive(:salt).and_return(nil)
     end
 
-    it "the hash method raises an error" do
-      expect {
-        Deidentify::BaseHash.call("dawn")
-      }.to raise_error(Deidentify::Error)
+    it 'the hash method raises an error' do
+      expect do
+        Deidentify::BaseHash.call('dawn')
+      end.to raise_error(Deidentify::Error)
     end
 
-    it "the hash email method raises an error" do
-      expect {
-        Deidentify::HashEmail.call("leaf.green@kanto.com")
-      }.to raise_error(Deidentify::Error)
+    it 'the hash email method raises an error' do
+      expect do
+        Deidentify::HashEmail.call('leaf.green@kanto.com')
+      end.to raise_error(Deidentify::Error)
     end
 
-    it "the hash url method raises an error" do
-      expect {
-        Deidentify::HashUrl.call("https://oaklabs.com")
-      }.to raise_error(Deidentify::Error)
+    it 'the hash url method raises an error' do
+      expect do
+        Deidentify::HashUrl.call('https://oaklabs.com')
+      end.to raise_error(Deidentify::Error)
     end
   end
 end
