@@ -244,3 +244,7 @@ class Payment < ApplicationRecord
   ...
 end
 ```
+
+## License
+
+This gem is available as open source under the terms of the MIT License.
