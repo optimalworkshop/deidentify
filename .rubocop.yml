@@ -1,6 +1,7 @@
 AllCops:
   Exclude:
     - 'lib/generators/templates/module_template.rb'
+    - 'vendor/**/*'
 
 Metrics/BlockLength:
   Exclude:
