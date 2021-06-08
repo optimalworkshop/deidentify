@@ -10,10 +10,10 @@ module Deidentify
 
       hash_length = calculate_hash_length(uri, length)
 
-      uri.host = Deidentify::BaseHash.call(uri.host, length: hash_length)
-      uri.path = "/#{Deidentify::BaseHash.call(remove_slash(uri.path), length: hash_length)}" if uri.path.present?
-      uri.query = Deidentify::BaseHash.call(uri.query, length: hash_length) if uri.query.present?
-      uri.fragment = Deidentify::BaseHash.call(uri.fragment, length: hash_length) if uri.fragment.present?
+      hash_host(uri, hash_length)
+      hash_path(uri, hash_length)
+      hash_query(uri, hash_length)
+      hash_fragment(uri, hash_length)
 
       uri.to_s
     end
@@ -24,8 +24,24 @@ module Deidentify
       (length - 'https:///?#'.length) / number_of_hashes
     end
 
+    def self.hash_host(uri, hash_length)
+      uri.host = Deidentify::BaseHash.call(uri.host, length: hash_length)
+    end
+
+    def self.hash_path(uri, hash_length)
+      uri.path = "/#{Deidentify::BaseHash.call(remove_slash(uri.path), length: hash_length)}" if uri.path.present?
+    end
+
     def self.remove_slash(path)
-      path[1..-1]
+      path[1..]
+    end
+
+    def self.hash_query(uri, hash_length)
+      uri.query = Deidentify::BaseHash.call(uri.query, length: hash_length) if uri.query.present?
+    end
+
+    def self.hash_fragment(uri, hash_length)
+      uri.fragment = Deidentify::BaseHash.call(uri.fragment, length: hash_length) if uri.fragment.present?
     end
   end
 end

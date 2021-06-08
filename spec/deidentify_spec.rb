@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 
-describe Deidentify do
-  class Bubble < ActiveRecord::Base
-    include Deidentify
-  end
+class Bubble < ActiveRecord::Base
+  include Deidentify
+end
 
+describe Deidentify do
   before do
     ActiveRecord::Base.establish_connection adapter: 'sqlite3', database: ':memory:'
     ActiveRecord::Base.connection.execute 'DROP TABLE IF EXISTS bubbles'
-    ActiveRecord::Base.connection.execute 'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, colour VARCHAR(32), quantity INTEGER)'
+    ActiveRecord::Base.connection.execute(
+      'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, colour VARCHAR(32), quantity INTEGER)'
+    )
 
     expect(bubble.colour).to eq(old_colour)
     expect(bubble.quantity).to eq(old_quantity)

@@ -9,5 +9,6 @@ Gem::Specification.new do |s|
   s.files       = Dir['lib/**/*.rb']
 
   s.required_rubygems_version
+  s.required_ruby_version = '>= 2.6'
   s.add_runtime_dependency 'rails', '>= 5.0.0'
 end
