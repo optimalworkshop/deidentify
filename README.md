@@ -245,6 +245,18 @@ class Payment < ApplicationRecord
 end
 ```
 
+## Contributing
+
+Contributions are very welcome.
+
+Please raise any problems you find as issues or create a pull request with a fix. Raise any new features as pull requests.
+
+When contributing code please make sure that:
+* The PR contains a detailed description of the feature or issue
+* It is well tested
+* All tests pass
+* Rubocop reports no new warnings
+
 ## License
 
 This gem is available as open source under the terms of the MIT License.
