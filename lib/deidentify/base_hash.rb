@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Deidentify
   class BaseHash
     def self.call(old_value, length: nil)
@@ -5,15 +7,11 @@ module Deidentify
 
       salt = Deidentify.configuration.salt
 
-      if salt.blank?
-        raise Deidentify::Error.new("You must specify the salting value in the configuration")
-      end
+      raise Deidentify::Error, 'You must specify the salting value in the configuration' if salt.blank?
 
       hash = Digest::SHA256.hexdigest(old_value + salt)
 
-      if length.present? && length < hash.length
-        hash = hash[0, length]
-      end
+      hash = hash[0, length] if length.present? && length < hash.length
 
       hash
     end

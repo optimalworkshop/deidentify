@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'deidentify/configuration'
 require 'deidentify/replace'
 require 'deidentify/delete'
@@ -28,8 +30,8 @@ module Deidentify
     hash_email: Deidentify::HashEmail,
     hash_url: Deidentify::HashUrl,
     keep: Deidentify::Keep,
-    delocalize_ip: Deidentify::DelocalizeIp,
-  }
+    delocalize_ip: Deidentify::DelocalizeIp
+  }.freeze
   included do
     class_attribute :deidentify_configuration
     self.deidentify_configuration = {}
@@ -38,7 +40,7 @@ module Deidentify
   module ClassMethods
     def deidentify(column, method:, **options)
       unless POLICY_MAP.keys.include?(method) || method.respond_to?(:call)
-        raise Deidentify::Error.new("you must specify a valid deidentification method")
+        raise Deidentify::Error, 'you must specify a valid deidentification method'
       end
 
       deidentify_configuration[column] = [method, options]
@@ -47,15 +49,15 @@ module Deidentify
 
   def deidentify!
     ActiveRecord::Base.transaction do
-      self.deidentify_configuration.each_pair do |col, config|
+      deidentify_configuration.each_pair do |col, config|
         policy, options = Array(config)
         old_value = send(col)
 
         new_value = if policy.respond_to? :call
-          policy.call(old_value)
-        else
-          POLICY_MAP[policy].call(old_value, **options)
-        end
+                      policy.call(old_value)
+                    else
+                      POLICY_MAP[policy].call(old_value, **options)
+                    end
 
         write_attribute(col, new_value)
       end

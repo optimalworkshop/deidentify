@@ -1,0 +1,14 @@
+AllCops:
+  Exclude:
+    - 'lib/generators/templates/module_template.rb'
+    - 'vendor/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*_spec.rb'
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 15

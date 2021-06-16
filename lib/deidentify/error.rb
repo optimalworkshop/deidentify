@@ -1,2 +1,6 @@
-class Deidentify::Error < StandardError
+# frozen_string_literal: true
+
+module Deidentify
+  class Error < StandardError
+  end
 end
