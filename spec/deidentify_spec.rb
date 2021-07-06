@@ -52,6 +52,45 @@ describe Deidentify do
     end
   end
 
+  describe 'callbacks' do
+    before do
+    end
+
+    context 'before deidentify' do
+      before do
+        Bubble.before_deidentify :before_callback
+
+        Bubble.define_method :before_callback do
+          # do nothing
+        end
+      end
+
+      it 'call the callback before saving' do
+        expect(bubble).to receive(:before_callback).ordered
+        expect(bubble).to receive(:save!).ordered
+
+        bubble.deidentify!
+      end
+    end
+
+    context 'after deidentify' do
+      before do
+        Bubble.after_deidentify :after_callback
+
+        Bubble.define_method :after_callback do
+          # do nothing
+        end
+      end
+
+      it 'call the callback after saving' do
+        expect(bubble).to receive(:save!).ordered
+        expect(bubble).to receive(:after_callback).ordered
+
+        bubble.deidentify!
+      end
+    end
+  end
+
   describe 'replace' do
     context 'for a string value' do
       before do

@@ -32,9 +32,12 @@ module Deidentify
     keep: Deidentify::Keep,
     delocalize_ip: Deidentify::DelocalizeIp
   }.freeze
+
   included do
     class_attribute :deidentify_configuration
     self.deidentify_configuration = {}
+
+    define_model_callbacks :deidentify
   end
 
   module ClassMethods
@@ -49,20 +52,22 @@ module Deidentify
 
   def deidentify!
     ActiveRecord::Base.transaction do
-      deidentify_configuration.each_pair do |col, config|
-        policy, options = Array(config)
-        old_value = send(col)
+      run_callbacks(:deidentify) do
+        deidentify_configuration.each_pair do |col, config|
+          policy, options = Array(config)
+          old_value = send(col)
 
-        new_value = if policy.respond_to? :call
-                      policy.call(old_value)
-                    else
-                      POLICY_MAP[policy].call(old_value, **options)
-                    end
+          new_value = if policy.respond_to? :call
+                        policy.call(old_value)
+                      else
+                        POLICY_MAP[policy].call(old_value, **options)
+                      end
 
-        write_attribute(col, new_value)
+          write_attribute(col, new_value)
+        end
+
+        save!
       end
-
-      save!
     end
   end
 end
