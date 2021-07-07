@@ -2,7 +2,6 @@
 
 require 'spec_helper'
 
-# TODO change to ApplicationRecord
 class Bubble < ActiveRecord::Base
   include Deidentify
 
@@ -102,6 +101,14 @@ describe Deidentify do
   end
 
   describe 'deidentify_associations!' do
+    context 'with an undefined association' do
+      it 'throws an error' do
+        expect do
+          Bubble.deidentify_associations :party, :circus
+        end.to raise_error(Deidentify::Error)
+      end
+    end
+
     context 'collection associations' do
       let(:party) { Party.create! }
 
