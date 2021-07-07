@@ -80,4 +80,39 @@ describe Deidentify::HashUrl do
       expect(new_url).to be_nil
     end
   end
+
+  describe 'deidentify interface' do
+    let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
+    let(:old_colour) { 'blue@eiffel65.com' }
+    let(:old_quantity) { 150 }
+    let(:new_url) { 'url' }
+
+    context 'with length' do
+      before do
+        Bubble.deidentify :colour, method: :hash_url, length: length
+      end
+
+      let(:length) { 21 }
+
+      it 'returns a hashed url' do
+        expect(Deidentify::HashUrl).to receive(:call).with(old_colour, length: length).and_return(new_url)
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_url)
+      end
+    end
+
+    context 'with no length' do
+      before do
+        Bubble.deidentify :colour, method: :hash_url
+      end
+
+      it 'returns a hashed url' do
+        expect(Deidentify::HashUrl).to receive(:call).with(old_colour, any_args).and_return(new_url)
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_url)
+      end
+    end
+  end
 end

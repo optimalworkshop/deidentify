@@ -53,7 +53,6 @@ module Deidentify
     end
 
     def deidentify_associations(*associations)
-      # TODO split massive spec file
       # TODO: how to stop loops?
       associations.each do |association_name|
         if reflect_on_association(association_name).nil?

@@ -3,28 +3,75 @@
 require 'spec_helper'
 
 describe Deidentify::Replace do
-  let(:new_value) { Deidentify::Replace.call(old_value, new_value: replacement) }
-  let(:replacement) { 'new' }
-  let(:old_value) { 'old' }
+  let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
+  let(:old_colour) { 'blue@eiffel65.com' }
+  let(:old_quantity) { 150 }
 
-  it 'returns the new value' do
-    expect(new_value).to eq(replacement)
+  context 'for a string value' do
+    before do
+      Bubble.deidentify :colour, method: :replace, new_value: new_colour
+    end
+
+    let(:new_colour) { 'iridescent' }
+
+    it 'replaces the value' do
+      bubble.deidentify!
+
+      expect(bubble.colour).to eq(new_colour)
+    end
   end
 
-  context 'when the old value is nil' do
-    let(:old_value) { nil }
+  context 'for a number value' do
+    before do
+      Bubble.deidentify :quantity, method: :replace, new_value: new_quantity
+    end
 
-    context 'nils should be retained' do
-      it 'returns nil' do
-        expect(new_value).to be_nil
+    let(:new_quantity) { 42 }
+
+    it 'replaces the value' do
+      bubble.deidentify!
+
+      expect(bubble.quantity).to eq(new_quantity)
+    end
+  end
+
+  context 'for a nil value' do
+    let(:old_colour) { nil }
+    let(:new_colour) { 'iridescent' }
+
+    context 'by default' do
+      before do
+        Bubble.deidentify :colour, method: :replace, new_value: new_colour
+      end
+
+      it 'keeps the nil' do
+        bubble.deidentify!
+
+        expect(bubble.colour).to be_nil
       end
     end
 
-    context 'nils should be replaced' do
-      let(:new_value) { Deidentify::Replace.call(old_value, new_value: replacement, keep_nil: false) }
+    context 'when nil should be kept' do
+      before do
+        Bubble.deidentify :colour, method: :replace, new_value: new_colour, keep_nil: true
+      end
 
-      it 'returns the new value' do
-        expect(new_value).to eq(replacement)
+      it 'keeps the nil' do
+        bubble.deidentify!
+
+        expect(bubble.colour).to be_nil
+      end
+    end
+
+    context 'when nil should be replaced' do
+      before do
+        Bubble.deidentify :colour, method: :replace, new_value: new_colour, keep_nil: false
+      end
+
+      it 'replaces the value' do
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_colour)
       end
     end
   end
