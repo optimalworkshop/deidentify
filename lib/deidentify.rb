@@ -37,7 +37,10 @@ module Deidentify
     class_attribute :deidentify_configuration
     self.deidentify_configuration = {}
 
+    class_attribute :associations_to_deidentify
+
     define_model_callbacks :deidentify
+    after_deidentify :deidentify_associations!, if: -> { associations_to_deidentify.present? }
   end
 
   module ClassMethods
@@ -47,6 +50,12 @@ module Deidentify
       end
 
       deidentify_configuration[column] = [method, options]
+    end
+
+    def deidentify_associations(*associations)
+      # TODO add error if associations doesn't exist
+      # TODO: how to stop loops?
+      self.associations_to_deidentify = associations
     end
   end
 
@@ -69,5 +78,21 @@ module Deidentify
         save!
       end
     end
+  end
+
+  def deidentify_associations!
+    associations_to_deidentify.each do |association_name|
+      if collection_association?(association_name)
+        send(association_name).each(&:deidentify!)
+      else
+        send(association_name)&.deidentify!
+      end
+    end
+  end
+
+  private
+
+  def collection_association?(association_name)
+    self.class.reflect_on_association(association_name).collection?
   end
 end

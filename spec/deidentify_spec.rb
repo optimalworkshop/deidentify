@@ -2,16 +2,29 @@
 
 require 'spec_helper'
 
+# TODO change to ApplicationRecord
 class Bubble < ActiveRecord::Base
   include Deidentify
+
+  belongs_to :party
+end
+
+class Party < ActiveRecord::Base
+  include Deidentify
+
+  has_many :bubbles
 end
 
 describe Deidentify do
   before do
     ActiveRecord::Base.establish_connection adapter: 'sqlite3', database: ':memory:'
     ActiveRecord::Base.connection.execute 'DROP TABLE IF EXISTS bubbles'
+    ActiveRecord::Base.connection.execute 'DROP TABLE IF EXISTS parties'
     ActiveRecord::Base.connection.execute(
-      'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, colour VARCHAR(32), quantity INTEGER)'
+      'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, party_id INTEGER, colour VARCHAR(32), quantity INTEGER)'
+    )
+    ActiveRecord::Base.connection.execute(
+      'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY)'
     )
 
     expect(bubble.colour).to eq(old_colour)
@@ -53,9 +66,6 @@ describe Deidentify do
   end
 
   describe 'callbacks' do
-    before do
-    end
-
     context 'before deidentify' do
       before do
         Bubble.before_deidentify :before_callback
@@ -87,6 +97,63 @@ describe Deidentify do
         expect(bubble).to receive(:after_callback).ordered
 
         bubble.deidentify!
+      end
+    end
+  end
+
+  describe 'deidentify_associations!' do
+    context 'collection associations' do
+      let(:party) { Party.create! }
+
+      before do
+        Party.deidentify_associations :bubbles
+      end
+
+      context 'when it is set' do
+        let(:second_bubble) { Bubble.create! }
+
+        before do
+          party.update!(bubbles: [bubble, second_bubble])
+        end
+
+        it 'call deidentify on both bubbles' do
+          expect(bubble).to receive(:deidentify!)
+          expect(second_bubble).to receive(:deidentify!)
+
+          party.deidentify!
+        end
+      end
+
+      context 'when it is empty' do
+        it 'does not call deidentify' do
+          expect { party.deidentify! }.not_to raise_error
+        end
+      end
+    end
+
+    context 'singular associations' do
+      before do
+        Bubble.deidentify_associations :party
+      end
+
+      context 'when it is set' do
+        let(:party) { Party.create! }
+
+        before do
+          bubble.update!(party: party)
+        end
+
+        it 'deidentifies the party' do
+          expect(party).to receive(:deidentify!)
+
+          bubble.deidentify!
+        end
+      end
+
+      context 'when it is nil' do
+        it 'does not call deidentify' do
+          expect { bubble.deidentify! }.not_to raise_error
+        end
       end
     end
   end
