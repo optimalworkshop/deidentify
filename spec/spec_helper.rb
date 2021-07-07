@@ -33,4 +33,12 @@ RSpec.configure do |config|
       'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY)'
     )
   end
+
+  config.before(:each) do
+    Bubble.deidentify_configuration = {}
+    Bubble.associations_to_deidentify = nil
+
+    Party.deidentify_configuration = {}
+    Party.associations_to_deidentify = nil
+  end
 end
