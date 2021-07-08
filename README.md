@@ -44,16 +44,33 @@ person = Person.find(id)
 person.deidentify!
 ```
 
-### Secret Configuration
+This will deidentify the person according to your configuration.
 
-For the hashing deidenitification methods you can configure this gem to take a secret which will be used to salt the hashed values.
-Do this by creating this file `config/initializers/deidentify.rb`
+### Recursive Deidentification
+
+This gem allows you to deidentify all data associated with a single object(mostly likely a single user). It does this by traversing associations to propagate the deidentify call.
 
 ```ruby
-Deidentify.configure do |config|
-  config.salt = # Your secret value
+class Person < ApplicationRecord
+  include Deidentify
+
+  belongs_to :organisation
+  has_many :projects
+
+  deidentify :name, method: :replace, new_value: "deidentified"
+
+  deidentify_associations :organisation, :projects
 end
 ```
+
+Then calling
+
+```ruby
+person = Person.find(id)
+person.deidentify!
+```
+
+will deidentify the person, the organisation they belong to and their projects. It will use the deidentification configuration defined in each class to determine which fields to change.
 
 ## Deidentification Methods
 ### Delete
@@ -159,6 +176,16 @@ NOTE: You get the same behaviour by simply not specifing a deidentification meth
 
 `Keep` is designed so that it is possible to mark a field as not containing sensitive data. That makes it obvious which fields have been purposely not changed and which have been missed during development.
 
+## Secret Configuration
+
+For the hashing deidenitification methods you can configure this gem to take a secret which will be used to salt the hashed values.
+Do this by creating this file `config/initializers/deidentify.rb`
+
+```ruby
+Deidentify.configure do |config|
+  config.salt = # Your secret value
+end
+```
 ## Generator
 
 This gem comes with a generator that will generate a deidentification policy module for a model. By calling
