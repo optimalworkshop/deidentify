@@ -72,6 +72,23 @@ person.deidentify!
 
 will deidentify the person, the organisation they belong to and their projects. It will use the deidentification configuration defined in each class to determine which fields to change.
 
+### Callbacks
+
+You can specify callbacks for the deidentify method.
+
+```ruby
+class Person < ApplicationRecord
+  include Deidentify
+
+  deidentify :name, method: :replace, new_value: "deidentified"
+
+  before_deidentify do
+    delete_file_from_external_store
+    send_deletion_request_to_third_party
+  end
+end
+```
+
 ## Deidentification Methods
 ### Delete
 
