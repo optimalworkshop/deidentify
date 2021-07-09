@@ -74,6 +74,8 @@ describe Deidentify do
   end
 
   describe 'deidentify_associations!' do
+    let(:new_value) { 'hi all' }
+
     context 'with an undefined association' do
       it 'throws an error' do
         expect do
@@ -87,20 +89,21 @@ describe Deidentify do
 
       before do
         Party.deidentify_associations :bubbles
+        Bubble.deidentify :colour, method: :replace, new_value: new_value
       end
 
       context 'when it is set' do
-        let(:second_bubble) { Bubble.create! }
+        let(:second_bubble) { Bubble.create!(colour: 'red') }
 
         before do
           party.update!(bubbles: [bubble, second_bubble])
         end
 
         it 'call deidentify on both bubbles' do
-          expect(bubble).to receive(:deidentify!)
-          expect(second_bubble).to receive(:deidentify!)
-
           party.deidentify!
+
+          expect(bubble.reload.colour).to eq new_value
+          expect(second_bubble.reload.colour).to eq new_value
         end
       end
 
@@ -114,19 +117,20 @@ describe Deidentify do
     context 'singular associations' do
       before do
         Bubble.deidentify_associations :party
+        Party.deidentify :name, method: :replace, new_value: new_value
       end
 
       context 'when it is set' do
-        let(:party) { Party.create! }
+        let(:party) { Party.create!(name: 'bob') }
 
         before do
           bubble.update!(party: party)
         end
 
         it 'deidentifies the party' do
-          expect(party).to receive(:deidentify!)
-
           bubble.deidentify!
+
+          expect(party.reload.name).to eq new_value
         end
       end
 

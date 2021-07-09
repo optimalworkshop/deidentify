@@ -63,7 +63,13 @@ module Deidentify
     end
   end
 
-  def deidentify!(deidentified_objects: [])
+  def deidentify!
+    recursive_deidentify!(deidentified_objects: [])
+  end
+
+  protected
+
+  def recursive_deidentify!(deidentified_objects:)
     ActiveRecord::Base.transaction do
       @deidentified_objects = deidentified_objects
 
@@ -107,7 +113,7 @@ module Deidentify
   def deidentify_object!(object)
     return if object.nil? || @deidentified_objects.include?(object)
 
-    object.deidentify!(deidentified_objects: @deidentified_objects)
+    object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
   end
 
   def collection_association?(association_name)

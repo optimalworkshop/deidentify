@@ -30,7 +30,7 @@ RSpec.configure do |config|
       'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, party_id INTEGER, colour VARCHAR(32), quantity INTEGER)'
     )
     ActiveRecord::Base.connection.execute(
-      'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY)'
+      'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY, name VARCHAR(32))'
     )
   end
 
