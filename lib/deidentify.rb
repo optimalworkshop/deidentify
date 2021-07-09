@@ -53,7 +53,6 @@ module Deidentify
     end
 
     def deidentify_associations(*associations)
-      # TODO: how to stop loops?
       associations.each do |association_name|
         if reflect_on_association(association_name).nil?
           raise Deidentify::Error, "cannot deidentify undefined association #{association_name}"
@@ -64,21 +63,16 @@ module Deidentify
     end
   end
 
-  def deidentify!
+  def deidentify!(deidentified_objects: [])
     ActiveRecord::Base.transaction do
+      @deidentified_objects = deidentified_objects
+
       run_callbacks(:deidentify) do
         deidentify_configuration.each_pair do |col, config|
-          policy, options = Array(config)
-          old_value = send(col)
-
-          new_value = if policy.respond_to? :call
-                        policy.call(old_value)
-                      else
-                        POLICY_MAP[policy].call(old_value, **options)
-                      end
-
-          write_attribute(col, new_value)
+          deidentify_column(col, config)
         end
+
+        @deidentified_objects << self
 
         save!
       end
@@ -87,14 +81,33 @@ module Deidentify
 
   private
 
+  def deidentify_column(column, config)
+    policy, options = Array(config)
+    old_value = send(column)
+
+    new_value = if policy.respond_to? :call
+                  policy.call(old_value)
+                else
+                  POLICY_MAP[policy].call(old_value, **options)
+                end
+
+    write_attribute(column, new_value)
+  end
+
   def deidentify_associations!
     associations_to_deidentify.each do |association_name|
       if collection_association?(association_name)
-        send(association_name).each(&:deidentify!)
+        send(association_name).each { |object| deidentify_object!(object) }
       else
-        send(association_name)&.deidentify!
+        deidentify_object!(send(association_name))
       end
     end
+  end
+
+  def deidentify_object!(object)
+    return if object.nil? || @deidentified_objects.include?(object)
+
+    object.deidentify!(deidentified_objects: @deidentified_objects)
   end
 
   def collection_association?(association_name)

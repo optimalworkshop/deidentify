@@ -136,6 +136,29 @@ describe Deidentify do
         end
       end
     end
+
+    context 'when a loop is created by deidentifing associations' do
+      let(:party) { Party.create! }
+      let(:second_bubble) { Bubble.create!(party: party, colour: 'red') }
+
+      before do
+        Bubble.deidentify :colour, method: :replace, new_value: 'deidentified'
+        Bubble.deidentify_associations :party
+        Party.deidentify_associations :bubbles
+
+        second_bubble
+        bubble.update!(party: party)
+      end
+
+      it 'should not loop forever' do
+        expect do
+          party.deidentify!
+        end.to_not raise_error
+
+        expect(bubble.reload.colour).to eq 'deidentified'
+        expect(second_bubble.reload.colour).to eq 'deidentified'
+      end
+    end
   end
 
   describe 'lambda' do
