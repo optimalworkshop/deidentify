@@ -2,22 +2,7 @@
 
 require 'spec_helper'
 
-class Bubble < ActiveRecord::Base
-  include Deidentify
-end
-
 describe Deidentify do
-  before do
-    ActiveRecord::Base.establish_connection adapter: 'sqlite3', database: ':memory:'
-    ActiveRecord::Base.connection.execute 'DROP TABLE IF EXISTS bubbles'
-    ActiveRecord::Base.connection.execute(
-      'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, colour VARCHAR(32), quantity INTEGER)'
-    )
-
-    expect(bubble.colour).to eq(old_colour)
-    expect(bubble.quantity).to eq(old_quantity)
-  end
-
   let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
   let(:old_colour) { 'blue@eiffel65.com' }
   let(:old_quantity) { 150 }
@@ -53,9 +38,6 @@ describe Deidentify do
   end
 
   describe 'callbacks' do
-    before do
-    end
-
     context 'before deidentify' do
       before do
         Bubble.before_deidentify :before_callback
@@ -91,125 +73,94 @@ describe Deidentify do
     end
   end
 
-  describe 'replace' do
-    context 'for a string value' do
-      before do
-        Bubble.deidentify :colour, method: :replace, new_value: new_colour
-      end
+  describe 'deidentify_associations!' do
+    let(:new_value) { 'hi all' }
 
-      let(:new_colour) { 'iridescent' }
-
-      it 'replaces the value' do
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_colour)
+    context 'with an undefined association' do
+      it 'throws an error' do
+        expect do
+          Bubble.deidentify_associations :party, :circus
+        end.to raise_error(Deidentify::Error)
       end
     end
 
-    context 'for a number value' do
+    context 'collection associations' do
+      let(:party) { Party.create! }
+
       before do
-        Bubble.deidentify :quantity, method: :replace, new_value: new_quantity
+        Party.deidentify_associations :bubbles
+        Bubble.deidentify :colour, method: :replace, new_value: new_value
       end
 
-      let(:new_quantity) { 42 }
+      context 'when it is set' do
+        let(:second_bubble) { Bubble.create!(colour: 'red') }
 
-      it 'replaces the value' do
-        bubble.deidentify!
-
-        expect(bubble.quantity).to eq(new_quantity)
-      end
-    end
-
-    context 'for a nil value' do
-      let(:old_colour) { nil }
-      let(:new_colour) { 'iridescent' }
-
-      context 'by default' do
         before do
-          Bubble.deidentify :colour, method: :replace, new_value: new_colour
+          party.update!(bubbles: [bubble, second_bubble])
         end
 
-        it 'keeps the nil' do
+        it 'call deidentify on both bubbles' do
+          party.deidentify!
+
+          expect(bubble.reload.colour).to eq new_value
+          expect(second_bubble.reload.colour).to eq new_value
+        end
+      end
+
+      context 'when it is empty' do
+        it 'does not call deidentify' do
+          expect { party.deidentify! }.not_to raise_error
+        end
+      end
+    end
+
+    context 'singular associations' do
+      before do
+        Bubble.deidentify_associations :party
+        Party.deidentify :name, method: :replace, new_value: new_value
+      end
+
+      context 'when it is set' do
+        let(:party) { Party.create!(name: 'bob') }
+
+        before do
+          bubble.update!(party: party)
+        end
+
+        it 'deidentifies the party' do
           bubble.deidentify!
 
-          expect(bubble.colour).to be_nil
+          expect(party.reload.name).to eq new_value
         end
       end
 
-      context 'when nil should be kept' do
-        before do
-          Bubble.deidentify :colour, method: :replace, new_value: new_colour, keep_nil: true
-        end
-
-        it 'keeps the nil' do
-          bubble.deidentify!
-
-          expect(bubble.colour).to be_nil
-        end
-      end
-
-      context 'when nil should be replaced' do
-        before do
-          Bubble.deidentify :colour, method: :replace, new_value: new_colour, keep_nil: false
-        end
-
-        it 'replaces the value' do
-          bubble.deidentify!
-
-          expect(bubble.colour).to eq(new_colour)
+      context 'when it is nil' do
+        it 'does not call deidentify' do
+          expect { bubble.deidentify! }.not_to raise_error
         end
       end
     end
-  end
 
-  describe 'delete' do
-    context 'for a string value' do
+    context 'when a loop is created by deidentifing associations' do
+      let(:party) { Party.create! }
+      let(:second_bubble) { Bubble.create!(party: party, colour: 'red') }
+
       before do
-        Bubble.deidentify :colour, method: :delete
+        Bubble.deidentify :colour, method: :replace, new_value: 'deidentified'
+        Bubble.deidentify_associations :party
+        Party.deidentify_associations :bubbles
+
+        second_bubble
+        bubble.update!(party: party)
       end
 
-      it 'deletes the value' do
-        bubble.deidentify!
+      it 'should not loop forever' do
+        expect do
+          party.deidentify!
+        end.to_not raise_error
 
-        expect(bubble.colour).to be_nil
-      end
-    end
-
-    context 'for a number value' do
-      before do
-        Bubble.deidentify :quantity, method: :delete
-      end
-
-      it 'deletes the value' do
-        bubble.deidentify!
-
-        expect(bubble.quantity).to be_nil
-      end
-    end
-  end
-
-  describe 'keep' do
-    context 'for a string value' do
-      before do
-        Bubble.deidentify :colour, method: :keep
-      end
-
-      it 'does not change the value' do
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(old_colour)
-      end
-    end
-
-    context 'for a number value' do
-      before do
-        Bubble.deidentify :quantity, method: :keep
-      end
-
-      it 'does not change the value' do
-        bubble.deidentify!
-
-        expect(bubble.quantity).to eq(old_quantity)
+        expect(bubble.reload.colour).to eq 'deidentified'
+        expect(second_bubble.reload.colour).to eq 'deidentified'
       end
     end
   end
@@ -236,134 +187,6 @@ describe Deidentify do
         bubble.deidentify!
 
         expect(bubble.quantity).to eq(old_quantity * 2)
-      end
-    end
-  end
-
-  describe 'hash' do
-    let(:new_hash) { 'colourless' }
-
-    context 'with length' do
-      before do
-        Bubble.deidentify :colour, method: :hash, length: length
-      end
-
-      let(:length) { 20 }
-
-      it 'returns a hashed value' do
-        expect(Deidentify::BaseHash).to receive(:call).with(old_colour, length: length).and_return(new_hash)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_hash)
-      end
-    end
-
-    context 'with no length' do
-      before do
-        Bubble.deidentify :colour, method: :hash
-      end
-
-      it 'returns a hashed value' do
-        expect(Deidentify::BaseHash).to receive(:call).with(old_colour, any_args).and_return(new_hash)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_hash)
-      end
-    end
-  end
-
-  describe 'hash_email' do
-    let(:new_email) { 'unknown' }
-
-    context 'with length' do
-      before do
-        Bubble.deidentify :colour, method: :hash_email, length: length
-      end
-
-      let(:length) { 21 }
-
-      it 'returns a hashed email' do
-        expect(Deidentify::HashEmail).to receive(:call).with(old_colour, length: length).and_return(new_email)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_email)
-      end
-    end
-
-    context 'with no length' do
-      before do
-        Bubble.deidentify :colour, method: :hash_email
-      end
-
-      it 'returns a hashed email' do
-        expect(Deidentify::HashEmail).to receive(:call).with(old_colour, any_args).and_return(new_email)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_email)
-      end
-    end
-  end
-
-  describe 'hash_url' do
-    let(:new_url) { 'url' }
-
-    context 'with length' do
-      before do
-        Bubble.deidentify :colour, method: :hash_url, length: length
-      end
-
-      let(:length) { 21 }
-
-      it 'returns a hashed url' do
-        expect(Deidentify::HashUrl).to receive(:call).with(old_colour, length: length).and_return(new_url)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_url)
-      end
-    end
-
-    context 'with no length' do
-      before do
-        Bubble.deidentify :colour, method: :hash_url
-      end
-
-      it 'returns a hashed url' do
-        expect(Deidentify::HashUrl).to receive(:call).with(old_colour, any_args).and_return(new_url)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_url)
-      end
-    end
-  end
-
-  describe 'delocalize_ip' do
-    let(:new_ip) { 'ip address' }
-
-    context 'with mask length' do
-      before do
-        Bubble.deidentify :colour, method: :delocalize_ip, mask_length: mask_length
-      end
-
-      let(:mask_length) { 16 }
-
-      it 'returns a delocalized ip' do
-        expect(Deidentify::DelocalizeIp).to receive(:call).with(old_colour, mask_length: mask_length).and_return(new_ip)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_ip)
-      end
-    end
-
-    context 'with no mask length' do
-      before do
-        Bubble.deidentify :colour, method: :delocalize_ip
-      end
-
-      it 'returns a delocalized ip' do
-        expect(Deidentify::DelocalizeIp).to receive(:call).with(old_colour, any_args).and_return(new_ip)
-        bubble.deidentify!
-
-        expect(bubble.colour).to eq(new_ip)
       end
     end
   end

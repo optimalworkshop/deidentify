@@ -33,4 +33,39 @@ describe Deidentify::DelocalizeIp do
       expect(new_ip).to eq('2001:db8:85a3::')
     end
   end
+
+  describe 'deidentify interface' do
+    let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
+    let(:old_colour) { 'blue@eiffel65.com' }
+    let(:old_quantity) { 150 }
+    let(:new_ip) { 'ip address' }
+
+    context 'with mask length' do
+      before do
+        Bubble.deidentify :colour, method: :delocalize_ip, mask_length: mask_length
+      end
+
+      let(:mask_length) { 16 }
+
+      it 'returns a delocalized ip' do
+        expect(Deidentify::DelocalizeIp).to receive(:call).with(old_colour, mask_length: mask_length).and_return(new_ip)
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_ip)
+      end
+    end
+
+    context 'with no mask length' do
+      before do
+        Bubble.deidentify :colour, method: :delocalize_ip
+      end
+
+      it 'returns a delocalized ip' do
+        expect(Deidentify::DelocalizeIp).to receive(:call).with(old_colour, any_args).and_return(new_ip)
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_ip)
+      end
+    end
+  end
 end

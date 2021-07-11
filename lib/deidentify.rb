@@ -37,7 +37,10 @@ module Deidentify
     class_attribute :deidentify_configuration
     self.deidentify_configuration = {}
 
+    class_attribute :associations_to_deidentify
+
     define_model_callbacks :deidentify
+    after_deidentify :deidentify_associations!, if: -> { associations_to_deidentify.present? }
   end
 
   module ClassMethods
@@ -48,26 +51,70 @@ module Deidentify
 
       deidentify_configuration[column] = [method, options]
     end
+
+    def deidentify_associations(*associations)
+      associations.each do |association_name|
+        if reflect_on_association(association_name).nil?
+          raise Deidentify::Error, "cannot deidentify undefined association #{association_name}"
+        end
+      end
+
+      self.associations_to_deidentify = associations
+    end
   end
 
   def deidentify!
+    recursive_deidentify!(deidentified_objects: [])
+  end
+
+  protected
+
+  def recursive_deidentify!(deidentified_objects:)
+    @deidentified_objects = deidentified_objects
+
+    return if @deidentified_objects.include?(self)
+
     ActiveRecord::Base.transaction do
       run_callbacks(:deidentify) do
         deidentify_configuration.each_pair do |col, config|
-          policy, options = Array(config)
-          old_value = send(col)
-
-          new_value = if policy.respond_to? :call
-                        policy.call(old_value)
-                      else
-                        POLICY_MAP[policy].call(old_value, **options)
-                      end
-
-          write_attribute(col, new_value)
+          deidentify_column(col, config)
         end
+
+        @deidentified_objects << self
 
         save!
       end
     end
+  end
+
+  private
+
+  def deidentify_column(column, config)
+    policy, options = Array(config)
+    old_value = send(column)
+
+    new_value = if policy.respond_to? :call
+                  policy.call(old_value)
+                else
+                  POLICY_MAP[policy].call(old_value, **options)
+                end
+
+    write_attribute(column, new_value)
+  end
+
+  def deidentify_associations!
+    associations_to_deidentify.each do |association_name|
+      if collection_association?(association_name)
+        send(association_name).each do |object|
+          object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+        end
+      else
+        send(association_name)&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+      end
+    end
+  end
+
+  def collection_association?(association_name)
+    self.class.reflect_on_association(association_name).collection?
   end
 end

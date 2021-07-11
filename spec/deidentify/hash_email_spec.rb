@@ -59,4 +59,39 @@ describe Deidentify::HashEmail do
       expect(new_email).to be_nil
     end
   end
+
+  describe 'deidentify interface' do
+    let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
+    let(:old_colour) { 'blue@eiffel65.com' }
+    let(:old_quantity) { 150 }
+    let(:new_email) { 'unknown' }
+
+    context 'with length' do
+      before do
+        Bubble.deidentify :colour, method: :hash_email, length: length
+      end
+
+      let(:length) { 21 }
+
+      it 'returns a hashed email' do
+        expect(Deidentify::HashEmail).to receive(:call).with(old_colour, length: length).and_return(new_email)
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_email)
+      end
+    end
+
+    context 'with no length' do
+      before do
+        Bubble.deidentify :colour, method: :hash_email
+      end
+
+      it 'returns a hashed email' do
+        expect(Deidentify::HashEmail).to receive(:call).with(old_colour, any_args).and_return(new_email)
+        bubble.deidentify!
+
+        expect(bubble.colour).to eq(new_email)
+      end
+    end
+  end
 end
