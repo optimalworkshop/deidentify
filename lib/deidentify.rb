@@ -70,9 +70,11 @@ module Deidentify
   protected
 
   def recursive_deidentify!(deidentified_objects:)
-    ActiveRecord::Base.transaction do
-      @deidentified_objects = deidentified_objects
+    @deidentified_objects = deidentified_objects
 
+    return if @deidentified_objects.include?(self)
+
+    ActiveRecord::Base.transaction do
       run_callbacks(:deidentify) do
         deidentify_configuration.each_pair do |col, config|
           deidentify_column(col, config)
@@ -103,17 +105,13 @@ module Deidentify
   def deidentify_associations!
     associations_to_deidentify.each do |association_name|
       if collection_association?(association_name)
-        send(association_name).each { |object| deidentify_object!(object) }
+        send(association_name).each do |object|
+          object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+        end
       else
-        deidentify_object!(send(association_name))
+        send(association_name)&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
       end
     end
-  end
-
-  def deidentify_object!(object)
-    return if object.nil? || @deidentified_objects.include?(object)
-
-    object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
   end
 
   def collection_association?(association_name)
