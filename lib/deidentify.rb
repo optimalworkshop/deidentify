@@ -53,12 +53,6 @@ module Deidentify
     end
 
     def deidentify_associations(*associations)
-      associations.each do |association_name|
-        if reflect_on_association(association_name).nil?
-          raise Deidentify::Error, "cannot deidentify undefined association #{association_name}"
-        end
-      end
-
       self.associations_to_deidentify = associations
     end
   end
@@ -104,7 +98,13 @@ module Deidentify
 
   def deidentify_associations!
     associations_to_deidentify.each do |association_name|
-      if collection_association?(association_name)
+      association = self.class.reflect_on_association(association_name)
+
+      if association.nil?
+        raise Deidentify::Error, "undefined association #{association_name} in #{self.class.name} deidentification"
+      end
+
+      if association.collection?
         send(association_name).each do |object|
           object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
         end
@@ -112,9 +112,5 @@ module Deidentify
         send(association_name)&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
       end
     end
-  end
-
-  def collection_association?(association_name)
-    self.class.reflect_on_association(association_name).collection?
   end
 end

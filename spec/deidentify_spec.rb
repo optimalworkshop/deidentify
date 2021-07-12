@@ -76,11 +76,15 @@ describe Deidentify do
   describe 'deidentify_associations!' do
     let(:new_value) { 'hi all' }
 
-    context 'with an undefined association' do
-      it 'throws an error' do
+    context 'there is an undefined association' do
+      before do
+        Bubble.deidentify_associations :circus
+      end
+
+      it 'will raise a error' do
         expect do
-          Bubble.deidentify_associations :party, :circus
-        end.to raise_error(Deidentify::Error)
+          bubble.deidentify!
+        end.to raise_error Deidentify::Error
       end
     end
 
