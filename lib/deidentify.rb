@@ -88,7 +88,7 @@ module Deidentify
     old_value = send(column)
 
     new_value = if policy.respond_to? :call
-                  policy.call(old_value)
+                  policy.call(self)
                 else
                   POLICY_MAP[policy].call(old_value, **options)
                 end
