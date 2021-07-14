@@ -172,7 +172,7 @@ describe Deidentify do
   describe 'lambda' do
     context 'for a string value' do
       before do
-        Bubble.deidentify :colour, method: ->(colour) { "#{colour} deidentified" }
+        Bubble.deidentify :colour, method: ->(bubble) { "#{bubble.colour} deidentified" }
       end
 
       it 'returns the lambda result' do
@@ -184,7 +184,7 @@ describe Deidentify do
 
     context 'for a number value' do
       before do
-        Bubble.deidentify :quantity, method: ->(quantity) { quantity * 2 }
+        Bubble.deidentify :quantity, method: ->(bubble) { bubble.quantity * 2 }
       end
 
       it 'returns the lambda result' do

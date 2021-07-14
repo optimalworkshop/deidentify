@@ -178,7 +178,7 @@ deidentify :ip, method: :delocalize_ip, mask_length: 16
 You can pass a custom lambda as the deidentification method.
 
 ```ruby
-deidentify :email, method: -> (email) { "deidentified@#{email.split("@").last}" }
+deidentify :email, method: -> (person) { "deidentified@#{person.email.split("@").last}" }
 ```
 
 ### Keep
