@@ -145,6 +145,25 @@ describe Deidentify do
       end
     end
 
+    context 'when called more than once' do
+      let(:second_bubble) { Bubble.create!(colour: 'red') }
+      let(:party) { Party.create! }
+
+      before do
+        Party.deidentify_associations :bubbles
+        Party.deidentify_associations :main_bubble
+        Bubble.deidentify :colour, method: :replace, new_value: new_value
+
+        party.update!(bubbles: [second_bubble], main_bubble: bubble)
+      end
+
+      it 'call deidentify on all associations' do
+        party.deidentify!
+        expect(bubble.reload.colour).to eq new_value
+        expect(second_bubble.reload.colour).to eq new_value
+      end
+    end
+
     context 'when a loop is created by deidentifing associations' do
       let(:party) { Party.create! }
       let(:second_bubble) { Bubble.create!(party: party, colour: 'red') }

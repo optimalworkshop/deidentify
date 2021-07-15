@@ -19,6 +19,7 @@ class Party < ActiveRecord::Base
   include Deidentify
 
   has_many :bubbles
+  belongs_to :main_bubble, class_name: 'Bubble'
 end
 
 RSpec.configure do |config|
@@ -30,15 +31,15 @@ RSpec.configure do |config|
       'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, party_id INTEGER, colour VARCHAR(32), quantity INTEGER)'
     )
     ActiveRecord::Base.connection.execute(
-      'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY, name VARCHAR(32))'
+      'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY, name VARCHAR(32), main_bubble_id INTEGER)'
     )
   end
 
   config.before(:each) do
     Bubble.deidentify_configuration = {}
-    Bubble.associations_to_deidentify = nil
+    Bubble.associations_to_deidentify = []
 
     Party.deidentify_configuration = {}
-    Party.associations_to_deidentify = nil
+    Party.associations_to_deidentify = []
   end
 end
