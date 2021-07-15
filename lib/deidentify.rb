@@ -38,6 +38,7 @@ module Deidentify
     self.deidentify_configuration = {}
 
     class_attribute :associations_to_deidentify
+    self.associations_to_deidentify = []
 
     define_model_callbacks :deidentify
     after_deidentify :deidentify_associations!, if: -> { associations_to_deidentify.present? }
@@ -53,7 +54,7 @@ module Deidentify
     end
 
     def deidentify_associations(*associations)
-      self.associations_to_deidentify = associations
+      self.associations_to_deidentify += associations
     end
   end
 
