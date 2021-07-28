@@ -62,6 +62,24 @@ module Deidentify
     recursive_deidentify!(deidentified_objects: [])
   end
 
+  def deidentified_attrs
+    deidentified_attr_dict = {}
+    self.deidentify_configuration.each_pair do |col, config|
+        policy, options = Array(config)
+        old_value = send(col)
+
+        new_value = if policy.respond_to? :call
+          policy.call(old_value)
+        else
+          POLICY_MAP[policy].call(old_value, **options)
+        end
+        deidentified_attr_dict[col.to_sym] = new_value
+    end
+    deidentified_attr_dict
+  end
+
+
+
   protected
 
   def recursive_deidentify!(deidentified_objects:)
@@ -83,6 +101,7 @@ module Deidentify
   end
 
   private
+
 
   def deidentify_column(column, config)
     policy, options = Array(config)
