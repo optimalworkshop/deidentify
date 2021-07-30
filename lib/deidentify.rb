@@ -75,6 +75,10 @@ module Deidentify
         end
         deidentified_attr_dict[col.to_sym] = new_value
     end
+    non_deid_cols = self.class.column_names.map {|c| c.to_sym} - self.deidentify_configuration.keys
+    non_deid_cols.each do | c |
+      deidentified_attr_dict[c] = self[c]
+    end
     deidentified_attr_dict
   end
 
