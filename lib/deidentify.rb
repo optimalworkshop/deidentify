@@ -62,6 +62,12 @@ module Deidentify
     recursive_deidentify!(deidentified_objects: [])
   end
 
+  def deidentified_and_not_saved
+    deidentify_configuration.each_pair do |col, config|
+      deidentify_column(col, config)
+    end
+  end
+
   protected
 
   def recursive_deidentify!(deidentified_objects:)
