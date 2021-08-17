@@ -35,19 +35,21 @@ describe Deidentify::Replace do
     end
   end
 
-  context 'for a nil value' do
+  context 'for a nil or blank value' do
     let(:old_colour) { nil }
     let(:new_colour) { 'iridescent' }
 
     context 'by default' do
+      let(:old_colour) { '' }
+
       before do
         Bubble.deidentify :colour, method: :replace, new_value: new_colour
       end
 
-      it 'keeps the nil' do
+      it 'keeps the blank' do
         bubble.deidentify!
 
-        expect(bubble.colour).to be_nil
+        expect(bubble.colour).to eq old_colour
       end
     end
 

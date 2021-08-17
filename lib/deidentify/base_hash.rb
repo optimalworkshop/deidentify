@@ -3,7 +3,7 @@
 module Deidentify
   class BaseHash
     def self.call(old_value, length: nil)
-      return nil if old_value.nil?
+      return old_value unless old_value.present?
 
       salt = Deidentify.configuration.salt
 

@@ -18,6 +18,14 @@ describe Deidentify::DelocalizeIp do
     end
   end
 
+  context 'the ip is blank' do
+    let(:old_ip) { '' }
+
+    it 'returns blank string' do
+      expect(new_ip).to eq old_ip
+    end
+  end
+
   context 'when a network mask length is provided' do
     let(:new_ip) { Deidentify::DelocalizeIp.call(old_ip, mask_length: 16) }
 

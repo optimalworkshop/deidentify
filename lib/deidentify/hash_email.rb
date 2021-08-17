@@ -6,7 +6,7 @@ module Deidentify
     MAX_DOMAIN_LENGTH = 63
 
     def self.call(old_email, length: 255)
-      return nil if old_email.nil?
+      return old_email unless old_email.present?
 
       half_length = (length - 1) / 2 # the -1 is to account for the @ symbol
 

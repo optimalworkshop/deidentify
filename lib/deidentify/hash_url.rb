@@ -3,7 +3,7 @@
 module Deidentify
   class HashUrl
     def self.call(old_url, length: 255)
-      return nil if old_url.nil?
+      return old_url unless old_url.present?
 
       uri = URI.parse(old_url)
       uri = URI.parse("http://#{old_url}") if uri.scheme.nil?
