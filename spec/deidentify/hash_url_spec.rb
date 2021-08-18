@@ -81,6 +81,14 @@ describe Deidentify::HashUrl do
     end
   end
 
+  context 'the url is blank' do
+    let(:old_url) { '' }
+
+    it 'returns blank' do
+      expect(new_url).to eq old_url
+    end
+  end
+
   describe 'deidentify interface' do
     let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
     let(:old_colour) { 'blue@eiffel65.com' }

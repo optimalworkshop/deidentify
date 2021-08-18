@@ -45,6 +45,14 @@ describe Deidentify::BaseHash do
     end
   end
 
+  context 'when the value is blank' do
+    let(:old_value) { '' }
+
+    it 'returns blank' do
+      expect(new_value).to eq old_value
+    end
+  end
+
   describe 'deidentify interface' do
     let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
     let(:old_colour) { 'blue@eiffel65.com' }

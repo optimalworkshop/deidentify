@@ -60,6 +60,14 @@ describe Deidentify::HashEmail do
     end
   end
 
+  context 'the email is blank' do
+    let(:old_email) { '' }
+
+    it 'returns blank' do
+      expect(new_email).to eq old_email
+    end
+  end
+
   describe 'deidentify interface' do
     let(:bubble) { Bubble.create!(colour: old_colour, quantity: old_quantity) }
     let(:old_colour) { 'blue@eiffel65.com' }

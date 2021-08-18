@@ -3,7 +3,7 @@
 module Deidentify
   class DelocalizeIp
     def self.call(old_ip, mask_length: nil)
-      return nil if old_ip.nil?
+      return old_ip unless old_ip.present?
 
       addr = IPAddr.new(old_ip)
       addr.mask(mask_length || default_mask(addr)).to_s
