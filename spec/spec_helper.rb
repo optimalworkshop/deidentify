@@ -28,10 +28,20 @@ RSpec.configure do |config|
     ActiveRecord::Base.connection.execute 'DROP TABLE IF EXISTS bubbles'
     ActiveRecord::Base.connection.execute 'DROP TABLE IF EXISTS parties'
     ActiveRecord::Base.connection.execute(
-      'CREATE TABLE bubbles (id INTEGER NOT NULL PRIMARY KEY, party_id INTEGER, colour VARCHAR(32), quantity INTEGER)'
+      'CREATE TABLE bubbles (
+        id INTEGER NOT NULL PRIMARY KEY,
+        party_id INTEGER,
+        colour VARCHAR(32),
+        name VARCHAR(32),
+        quantity INTEGER
+      )'
     )
     ActiveRecord::Base.connection.execute(
-      'CREATE TABLE parties (id INTEGER NOT NULL PRIMARY KEY, name VARCHAR(32), main_bubble_id INTEGER)'
+      'CREATE TABLE parties (
+        id INTEGER NOT NULL PRIMARY KEY,
+        name VARCHAR(32),
+        main_bubble_id INTEGER
+      )'
     )
   end
 

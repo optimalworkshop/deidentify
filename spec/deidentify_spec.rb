@@ -186,6 +186,244 @@ describe Deidentify do
         expect(second_bubble.reload.colour).to eq 'deidentified'
       end
     end
+
+    context 'when a default scope is passed in via the configuration' do
+      let(:new_value) { "it's deidentified" }
+
+      before do
+        Bubble.deidentify :name, method: :replace, new_value: new_value
+        Party.deidentify :name, method: :replace, new_value: new_value
+      end
+
+      context 'the association has no scope' do
+        before do
+          Deidentify.configure do |config|
+            config.scope = ->(klass_or_association) { klass_or_association.where('length(name) < 10') }
+          end
+        end
+
+        context 'collection associations' do
+          let(:party) { Party.create! }
+          let(:less_than_ten) { Bubble.create!(party: party, name: 'fourteen') }
+          let(:greater_than_ten) { Bubble.create!(party: party, name: 'seventy-three') }
+
+          before do
+            Party.deidentify_associations :bubbles
+
+            less_than_ten
+            greater_than_ten
+          end
+
+          it 'should use the configuration scope' do
+            party.deidentify!
+
+            expect(less_than_ten.reload.name).to eq new_value
+            expect(greater_than_ten.reload.name).to eq 'seventy-three'
+          end
+        end
+
+        context 'has one associations' do
+          let(:party) { Party.create! }
+
+          before do
+            Party.has_one :bubble, class_name: 'Bubble', foreign_key: 'party_id'
+            Party.deidentify_associations :bubble
+          end
+
+          context 'when scope excludes record' do
+            let(:greater_than_ten) { Bubble.create!(party: party, name: 'seventy-three') }
+
+            before do
+              greater_than_ten
+            end
+
+            it 'should use the default scope' do
+              party.deidentify!
+
+              expect(greater_than_ten.reload.name).to eq 'seventy-three'
+            end
+          end
+
+          context 'when scope includes record' do
+            let(:less_than_ten) { Bubble.create!(party: party, name: 'four') }
+
+            before do
+              less_than_ten
+            end
+
+            it 'should use the default scope' do
+              party.deidentify!
+
+              expect(less_than_ten.reload.name).to eq new_value
+            end
+          end
+        end
+
+        context 'belongs to association' do
+          let(:bubble) { Bubble.create!(party: party) }
+
+          before do
+            Bubble.deidentify_associations :party
+          end
+
+          context 'when scope excludes record' do
+            let(:party) { Party.create!(name: 'seventy-three') }
+
+            it 'should use the default scope' do
+              bubble.deidentify!
+
+              expect(party.reload.name).to eq 'seventy-three'
+            end
+          end
+
+          context 'when scope includes record' do
+            let(:party) { Party.create!(name: 'four') }
+
+            it 'should use the default scope' do
+              bubble.deidentify!
+
+              expect(party.reload.name).to eq new_value
+            end
+          end
+        end
+      end
+
+      context 'the association has a scope' do
+        before do
+          Deidentify.configure do |config|
+            config.scope = ->(klass_or_association) { klass_or_association.where('length(name) >= 5') }
+          end
+        end
+
+        context 'collection association' do
+          let(:party) { Party.create! }
+          let(:less_than_five) { Bubble.create!(party: party, name: 'four') }
+          let(:less_than_ten) { Bubble.create!(party: party, name: 'seven') }
+          let(:greater_than_ten) { Bubble.create!(party: party, name: 'seventy-three') }
+
+          before do
+            Party.has_many :small_bubbles,
+              -> { where('length(name) < 10') },
+              class_name: 'Bubble',
+              foreign_key: 'party_id'
+            Party.deidentify_associations :small_bubbles
+
+            less_than_five
+            less_than_ten
+            greater_than_ten
+          end
+
+          it 'should apply both scopes' do
+            party.deidentify!
+
+            expect(less_than_five.reload.name).to eq 'four'
+            expect(less_than_ten.reload.name).to eq new_value
+            expect(greater_than_ten.reload.name).to eq 'seventy-three'
+          end
+        end
+
+        context 'has one association' do
+          let(:party) { Party.create! }
+          let(:less_than_five) { Bubble.create!(party: party, name: 'four') }
+
+          before do
+            Party.has_one :small_bubble,
+              -> { where('length(name) < 10') },
+              class_name: 'Bubble',
+              foreign_key: 'party_id'
+            Party.deidentify_associations :small_bubble
+
+            less_than_five
+          end
+
+          it 'should apply both scopes' do
+            party.deidentify!
+
+            expect(less_than_five.reload.name).to eq 'four'
+          end
+        end
+
+        context 'belongs to association' do
+          let(:less_than_five) { Party.create!(name: 'four') }
+          let(:bubble) { Bubble.create!(party: less_than_five) }
+
+          before do
+            Bubble.belongs_to :small_party,
+              -> { where('length(name) < 10') },
+              class_name: 'Party',
+              foreign_key: 'party_id'
+            Bubble.deidentify_associations :small_party
+          end
+
+          it 'should apply both scopes' do
+            bubble.deidentify!
+
+            expect(less_than_five.reload.name).to eq 'four'
+          end
+        end
+      end
+
+      context 'with a default scope' do
+        before do
+          Party.default_scopes = [-> { where('length(name) < 10') }]
+          Bubble.default_scopes = [-> { where('length(name) < 10') }]
+
+          Deidentify.configure do |config|
+            config.scope = ->(klass_or_association) { klass_or_association.unscoped }
+          end
+        end
+
+        context 'collection associations' do
+          let(:party) { Party.create! }
+          let(:greater_than_ten) { Bubble.create!(party: party, name: 'seventy-three') }
+
+          before do
+            Party.deidentify_associations :bubbles
+
+            greater_than_ten
+          end
+
+          it 'should override the default scope' do
+            party.deidentify!
+
+            expect(greater_than_ten.reload.name).to eq new_value
+          end
+        end
+
+        context 'has one associations' do
+          let(:party) { Party.create! }
+          let(:greater_than_ten) { Bubble.create!(party: party, name: 'seventy-three') }
+
+          before do
+            Party.has_one :bubble, class_name: 'Bubble', foreign_key: 'party_id'
+            Party.deidentify_associations :bubble
+
+            greater_than_ten
+          end
+
+          it 'should override the default scope' do
+            party.deidentify!
+
+            expect(greater_than_ten.reload.name).to eq new_value
+          end
+        end
+
+        context 'belongs to association' do
+          let(:bubble) { Bubble.create!(party: party) }
+          let(:party) { Party.create!(name: 'seventy-three') }
+
+          before do
+            Bubble.deidentify_associations :party
+          end
+
+          it 'should override the default scope' do
+            bubble.deidentify!
+
+            expect(party.reload.name).to eq new_value
+          end
+        end
+      end
+    end
   end
 
   describe 'lambda' do
