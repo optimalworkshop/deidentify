@@ -37,6 +37,24 @@ describe Deidentify do
     end
   end
 
+  context 'with a configuration scope' do
+    let(:bubble) { Bubble.create!(name: 'seventy-three') }
+
+    before do
+      Deidentify.configure do |config|
+        config.scope = ->(klass_or_association) { klass_or_association.where('name is null OR length(name) < 10') }
+      end
+
+      Bubble.deidentify :name, method: :delete
+    end
+
+    it 'will not deidentify if the scope excludes it' do
+      bubble.deidentify!
+
+      expect(bubble.name).to_not be_nil
+    end
+  end
+
   describe 'callbacks' do
     context 'before deidentify' do
       before do
@@ -198,7 +216,7 @@ describe Deidentify do
       context 'the association has no scope' do
         before do
           Deidentify.configure do |config|
-            config.scope = ->(klass_or_association) { klass_or_association.where('length(name) < 10') }
+            config.scope = ->(klass_or_association) { klass_or_association.where('name is null OR length(name) < 10') }
           end
         end
 
@@ -291,7 +309,7 @@ describe Deidentify do
       context 'the association has a scope' do
         before do
           Deidentify.configure do |config|
-            config.scope = ->(klass_or_association) { klass_or_association.where('length(name) >= 5') }
+            config.scope = ->(klass_or_association) { klass_or_association.where('name is null OR length(name) >= 5') }
           end
         end
 

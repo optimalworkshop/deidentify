@@ -59,6 +59,9 @@ module Deidentify
   end
 
   def deidentify!
+    scope = Deidentify.configuration.scope
+    return self if scope && scope.call(self.class).find_by(id: id).nil?
+
     recursive_deidentify!(deidentified_objects: [])
   end
 
