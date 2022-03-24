@@ -105,13 +105,57 @@ module Deidentify
         raise Deidentify::Error, "undefined association #{association_name} in #{self.class.name} deidentification"
       end
 
-      if association.collection?
-        send(association_name).each do |object|
-          object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
-        end
+      scope = Deidentify.configuration.scope
+      if scope
+        deidentify_associations_with_scope!(association_name, association, scope)
       else
-        send(association_name)&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+        deidentify_associations_without_scope!(association_name, association)
       end
     end
+  end
+
+  def deidentify_associations_without_scope!(association_name, association)
+    if association.collection?
+      deidentify_many!(send(association_name))
+    else
+      deidentify_one!(send(association_name))
+    end
+  end
+
+  def deidentify_associations_with_scope!(association_name, association, configuration_scope)
+    if association.collection?
+      class_query = class_query(association.scope, configuration_scope, send(association_name))
+
+      deidentify_many!(class_query)
+    else
+      class_query = class_query(association.scope, configuration_scope, association.klass)
+      # For a has_one association the foreign key is on the opposite table to a belongs_to association
+      # ie. belongs_to party has a party_id on the same class as the association
+      #     but, has_one party has the foreign_key on the Party class not the class containing the association
+      foreign_key = association.has_one? ? :id : association.foreign_key
+
+      deidentify_one!(class_query.find_by(id: send(foreign_key)))
+    end
+  end
+
+  def class_query(association_scope, configuration_scope, klass_or_association)
+    if association_scope.nil?
+      configuration_scope.call(klass_or_association)
+    else
+      # Use both the configuration scope and the scope from the association.
+      # Unfortunately the order here matters so something in the association_scope
+      # will take precedence over the configuration scope.
+      configuration_scope.call(klass_or_association).merge(association_scope)
+    end
+  end
+
+  def deidentify_many!(records)
+    records.each do |record|
+      record.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+    end
+  end
+
+  def deidentify_one!(record)
+    record&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
   end
 end
