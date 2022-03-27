@@ -215,7 +215,7 @@ end
 ```
 This scope will limit what records will be deidentified.
 
-So in this example it will not deidentified records that have already been marked as deidentified.
+So in this example it will not deidentify records that have already been marked as deidentified.
 
 ## Generator
 

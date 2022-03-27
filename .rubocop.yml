@@ -19,3 +19,6 @@ Layout/ArgumentAlignment:
 
 Metrics/ModuleLength:
   Max: 150
+
+Metrics/AbcSize:
+  Max: 18

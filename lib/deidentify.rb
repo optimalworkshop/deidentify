@@ -127,17 +127,23 @@ module Deidentify
 
   def deidentify_associations_with_scope!(association_name, association, configuration_scope)
     if association.collection?
+      # eg. has_many :bubbles, -> { popped }
+      # This will call configuration_scope.call(self.bubbles).merge(popped)
       class_query = class_query(association.scope, configuration_scope, send(association_name))
 
       deidentify_many!(class_query)
     else
       class_query = class_query(association.scope, configuration_scope, association.klass)
-      # For a has_one association the foreign key is on the opposite table to a belongs_to association
-      # ie. belongs_to party has a party_id on the same class as the association
-      #     but, has_one party has the foreign_key on the Party class not the class containing the association
-      foreign_key = association.has_one? ? :id : association.foreign_key
 
-      deidentify_one!(class_query.find_by(id: send(foreign_key)))
+      if association.has_one?
+        # eg. (bubble) has_one :party, -> { birthday }
+        # This will call configuration_scope.call(Party).merge(birthday).find_by(bubble_id: id)
+        deidentify_one!(class_query.find_by("#{association.foreign_key} = #{send(:id)}"))
+      else
+        # eg. belongs_to :party, -> { birthday }
+        # This will call configuration_scope.call(Party).merge(birthday).find_by(id: party_id)
+        deidentify_one!(class_query.find_by(id: send(association.foreign_key)))
+      end
     end
   end
 
