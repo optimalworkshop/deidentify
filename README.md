@@ -203,6 +203,20 @@ Deidentify.configure do |config|
   config.salt = # Your secret value
 end
 ```
+
+## Scope Configuration
+
+It's possible to pass a scope into the configuration.
+
+```ruby
+Deidentify.configure do |config|
+  config.scope = ->(klass_or_association) { klass_or_association.where(deidentified_at: nil) }
+end
+```
+This scope will limit what records will be deidentified.
+
+So in this example it will not deidentify records that have already been marked as deidentified.
+
 ## Generator
 
 This gem comes with a generator that will generate a deidentification policy module for a model. By calling

@@ -59,6 +59,9 @@ module Deidentify
   end
 
   def deidentify!
+    scope = Deidentify.configuration.scope
+    return self if scope && scope.call(self.class).find_by(id: id).nil?
+
     recursive_deidentify!(deidentified_objects: [])
   end
 
@@ -105,13 +108,63 @@ module Deidentify
         raise Deidentify::Error, "undefined association #{association_name} in #{self.class.name} deidentification"
       end
 
-      if association.collection?
-        send(association_name).each do |object|
-          object.recursive_deidentify!(deidentified_objects: @deidentified_objects)
-        end
+      scope = Deidentify.configuration.scope
+      if scope
+        deidentify_associations_with_scope!(association_name, association, scope)
       else
-        send(association_name)&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+        deidentify_associations_without_scope!(association_name, association)
       end
     end
+  end
+
+  def deidentify_associations_without_scope!(association_name, association)
+    if association.collection?
+      deidentify_many!(send(association_name))
+    else
+      deidentify_one!(send(association_name))
+    end
+  end
+
+  def deidentify_associations_with_scope!(association_name, association, configuration_scope)
+    if association.collection?
+      # eg. has_many :bubbles, -> { popped }
+      # This will call configuration_scope.call(self.bubbles).merge(popped)
+      class_query = class_query(association.scope, configuration_scope, send(association_name))
+
+      deidentify_many!(class_query)
+    else
+      class_query = class_query(association.scope, configuration_scope, association.klass)
+
+      if association.has_one?
+        # eg. (bubble) has_one :party, -> { birthday }
+        # This will call configuration_scope.call(Party).merge(birthday).find_by(bubble_id: id)
+        deidentify_one!(class_query.find_by("#{association.foreign_key} = #{send(:id)}"))
+      else
+        # eg. belongs_to :party, -> { birthday }
+        # This will call configuration_scope.call(Party).merge(birthday).find_by(id: party_id)
+        deidentify_one!(class_query.find_by(id: send(association.foreign_key)))
+      end
+    end
+  end
+
+  def class_query(association_scope, configuration_scope, klass_or_association)
+    if association_scope.nil?
+      configuration_scope.call(klass_or_association)
+    else
+      # Use both the configuration scope and the scope from the association.
+      # Unfortunately the order here matters so something in the association_scope
+      # will take precedence over the configuration scope.
+      configuration_scope.call(klass_or_association).merge(association_scope)
+    end
+  end
+
+  def deidentify_many!(records)
+    records.each do |record|
+      record.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+    end
+  end
+
+  def deidentify_one!(record)
+    record&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
   end
 end

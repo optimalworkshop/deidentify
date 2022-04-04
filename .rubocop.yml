@@ -6,9 +6,19 @@ AllCops:
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*_spec.rb'
+    - 'spec/spec_helper.rb'
 
 Style/Documentation:
   Enabled: false
 
 Metrics/MethodLength:
   Max: 15
+
+Layout/ArgumentAlignment:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Max: 150
+
+Metrics/AbcSize:
+  Max: 18
