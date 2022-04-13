@@ -40,7 +40,8 @@ RSpec.configure do |config|
       'CREATE TABLE parties (
         id INTEGER NOT NULL PRIMARY KEY,
         name VARCHAR(32),
-        main_bubble_id INTEGER
+        main_bubble_id INTEGER,
+        deidentified_at DATETIME
       )'
     )
   end

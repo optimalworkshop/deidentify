@@ -89,6 +89,10 @@ class Person < ApplicationRecord
 end
 ```
 
+### Deidentified At
+
+This gem will record if a record has been deidentified by using a `deidentified_at` timestamp. If a record has this timestamp then it will be set when the record is deidentified. This will not break if there is no `deidentified_at` on your record.
+
 ## Deidentification Methods
 ### Delete
 

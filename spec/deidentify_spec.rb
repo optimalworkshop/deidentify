@@ -444,6 +444,24 @@ describe Deidentify do
     end
   end
 
+  describe 'deidentified_at' do
+    context 'is defined' do
+      let(:party) { Party.create! }
+
+      it 'should set it' do
+        party.deidentify!
+
+        expect(party.deidentified_at).to_not be_nil
+      end
+    end
+
+    context 'is not defined' do
+      it 'should not throw a error' do
+        expect { bubble.deidentify! }.to_not raise_error
+      end
+    end
+  end
+
   describe 'lambda' do
     context 'for a string value' do
       before do
