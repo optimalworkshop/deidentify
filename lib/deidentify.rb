@@ -78,6 +78,8 @@ module Deidentify
           deidentify_column(col, config)
         end
 
+        write_attribute(:deidentified_at, Time.current) if respond_to?(:deidentified_at)
+
         @deidentified_objects << self
 
         save!
