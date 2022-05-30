@@ -65,6 +65,12 @@ module Deidentify
     recursive_deidentify!(deidentified_objects: [])
   end
 
+  def deidentify_attributes
+    deidentify_configuration.each_pair do |col, config|
+      deidentify_column(col, config)
+    end
+  end
+
   protected
 
   def recursive_deidentify!(deidentified_objects:)
@@ -74,9 +80,7 @@ module Deidentify
 
     ActiveRecord::Base.transaction do
       run_callbacks(:deidentify) do
-        deidentify_configuration.each_pair do |col, config|
-          deidentify_column(col, config)
-        end
+        deidentify_attributes
 
         write_attribute(:deidentified_at, Time.current) if respond_to?(:deidentified_at)
 
