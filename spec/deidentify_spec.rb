@@ -462,6 +462,36 @@ describe Deidentify do
     end
   end
 
+  describe '#deidentify_attributes' do
+    let(:party) { Party.create!(main_bubble: bubble, name: 'Happy Birthday') }
+    let(:bubble) { Bubble.create!(colour: 'purple') }
+
+    before do
+      Party.deidentify :name, method: :delete
+      Party.deidentify_associations :main_bubble
+
+      Bubble.deidentify :colour, method: :delete
+
+      party.deidentify_attributes
+    end
+
+    it 'deidentifies the record' do
+      expect(party.name).to be_nil
+    end
+
+    it 'does not save the record' do
+      expect(party).to be_changed
+    end
+
+    it 'does not run callbacks' do
+      expect(party.main_bubble.colour).to_not be_nil
+    end
+
+    it 'does not set deidentified_at' do
+      expect(party.deidentified_at).to be_nil
+    end
+  end
+
   describe 'lambda' do
     context 'for a string value' do
       before do
