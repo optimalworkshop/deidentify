@@ -492,6 +492,47 @@ describe Deidentify do
     end
   end
 
+  describe 'validate' do
+    before do
+      Party.validates :name, presence: true
+      Bubble.validates :colour, presence: true
+
+      Party.deidentify_associations :bubbles
+
+      Party.deidentify :name, method: :delete
+      Bubble.deidentify :colour, method: :delete
+    end
+
+    let!(:party) { Party.create!(name: 'Christmas') }
+    let!(:bubble) { Bubble.create!(colour: 'red', party: party) }
+
+    context 'false' do
+      it 'saves an invalid record' do
+        party.deidentify!(validate: false)
+
+        expect(party.name).to be_nil
+      end
+
+      it 'saves an associated invalid record' do
+        party.deidentify!(validate: false)
+
+        expect(bubble.reload.colour).to be_nil
+      end
+    end
+
+    context 'true' do
+      it 'does not save an invalid record' do
+        expect { party.deidentify! }.to raise_error ActiveRecord::RecordInvalid, /Name can't be blank/
+      end
+
+      it 'does not save an associated invalid record' do
+        Party.deidentify :name, method: :keep
+
+        expect { party.deidentify! }.to raise_error ActiveRecord::RecordInvalid, /Colour can't be blank/
+      end
+    end
+  end
+
   describe 'lambda' do
     context 'for a string value' do
       before do

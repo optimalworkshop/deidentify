@@ -58,11 +58,11 @@ module Deidentify
     end
   end
 
-  def deidentify!
+  def deidentify!(validate: true)
     scope = Deidentify.configuration.scope
     return self if scope && scope.call(self.class).find_by(id: id).nil?
 
-    recursive_deidentify!(deidentified_objects: [])
+    recursive_deidentify!(validate: validate, deidentified_objects: [])
   end
 
   def deidentify_attributes
@@ -73,7 +73,8 @@ module Deidentify
 
   protected
 
-  def recursive_deidentify!(deidentified_objects:)
+  def recursive_deidentify!(validate:, deidentified_objects:)
+    @validate = validate
     @deidentified_objects = deidentified_objects
 
     return if @deidentified_objects.include?(self)
@@ -86,7 +87,7 @@ module Deidentify
 
         @deidentified_objects << self
 
-        save!
+        save!(validate: validate)
       end
     end
   end
@@ -166,11 +167,11 @@ module Deidentify
 
   def deidentify_many!(records)
     records.each do |record|
-      record.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+      record.recursive_deidentify!(validate: @validate, deidentified_objects: @deidentified_objects)
     end
   end
 
   def deidentify_one!(record)
-    record&.recursive_deidentify!(deidentified_objects: @deidentified_objects)
+    record&.recursive_deidentify!(validate: @validate, deidentified_objects: @deidentified_objects)
   end
 end
