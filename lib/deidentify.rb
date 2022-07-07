@@ -96,7 +96,7 @@ module Deidentify
 
   def deidentify_column(column, config)
     policy, options = Array(config)
-    old_value = send(column)
+    old_value = read_attribute(column)
 
     new_value = if policy.respond_to? :call
                   policy.call(self)
