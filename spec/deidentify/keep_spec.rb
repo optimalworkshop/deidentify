@@ -29,5 +29,9 @@ describe Deidentify::Keep do
 
       expect(bubble.quantity).to eq(old_quantity)
     end
+
+    it 'test failure' do
+      expect(2+2).to eq(5)
+    end
   end
 end
