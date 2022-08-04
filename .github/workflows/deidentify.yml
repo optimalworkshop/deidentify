@@ -1,0 +1,20 @@
+name: Deidentify
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '2.6'
+    - name: Install dependencies
+      run: bundle install
+    - name: Run tests
+      run: bundle exec rake spec
+    - name: Run linter
+      run: bundle exec rubocop
