@@ -1,6 +1,6 @@
 # Deidentify
 
-Deidentify is a gem design to allow for easy removal of sensitive data.
+Deidentify is a gem designed to allow for easy removal of sensitive data.
 
 It defines a DSL that will allow you to choose which fields should be deidentified. It will then replace the specified database columns with a varity of deidentified values.
 
