@@ -6,6 +6,8 @@ Gem::Specification.new do |s|
   s.summary     = 'Deidentify a rails model'
   s.description = 'A gem to allow deidentification of certain fields'
   s.authors     = ['Lucy Dement']
+  s.homepage    = 'https://github.com/optimalworkshop/deidentify'
+  s.license     = 'MIT'
   s.files       = Dir['lib/**/*.rb']
 
   s.required_rubygems_version
