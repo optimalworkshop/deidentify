@@ -95,6 +95,11 @@ module Deidentify
   private
 
   def deidentify_column(column, config)
+    unless column_exists?(column)
+      Rails.logger.error "ERROR: Deidentification policy defined for #{column} but column doesn't exist"
+      return
+    end
+
     policy, options = Array(config)
     old_value = read_attribute(column)
 
@@ -105,6 +110,10 @@ module Deidentify
                 end
 
     write_attribute(column, new_value)
+  end
+
+  def column_exists?(column)
+    self.class.columns.map(&:name).include?(column.to_s)
   end
 
   def deidentify_associations!

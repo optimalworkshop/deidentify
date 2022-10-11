@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'rails'
 require 'rspec'
 require 'active_support'
 require 'active_record'
