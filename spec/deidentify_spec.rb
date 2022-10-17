@@ -23,6 +23,29 @@ describe Deidentify do
     end
   end
 
+  context 'the policy is for a column that does not exist' do
+    let(:logger) { instance_double(Logger, error: nil) }
+
+    before do
+      allow(Rails).to receive(:logger).and_return logger
+
+      Bubble.deidentify :oops, method: :delete
+      Bubble.deidentify :colour, method: :delete
+    end
+
+    it 'still deidentifies other columns' do
+      bubble.deidentify!
+
+      expect(bubble.colour).to be_nil
+    end
+
+    it 'logs an error' do
+      expect(logger).to receive(:error).with("ERROR: Deidentification policy defined for oops but column doesn't exist")
+
+      bubble.deidentify!
+    end
+  end
+
   context 'will deidentify two columns' do
     before do
       Bubble.deidentify :colour, method: :delete
