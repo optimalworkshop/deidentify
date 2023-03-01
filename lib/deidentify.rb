@@ -11,6 +11,8 @@ require 'deidentify/keep'
 require 'deidentify/error'
 
 module Deidentify
+
+
   class << self
     def configuration
       @configuration ||= Configuration.new
