@@ -40,7 +40,9 @@ describe Deidentify do
     end
 
     it 'logs an error' do
-      expect(logger).to receive(:error).with("ERROR: Deidentification policy defined for oops but column doesn't exist")
+      expect(logger).to receive(:error).with(
+        "ERROR: Deidentification policy defined for oops but column doesn't exist in bubbles"
+      )
 
       bubble.deidentify!
     end

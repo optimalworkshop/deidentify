@@ -96,7 +96,9 @@ module Deidentify
 
   def deidentify_column(column, config)
     unless column_exists?(column)
-      Rails.logger.error "ERROR: Deidentification policy defined for #{column} but column doesn't exist"
+      Rails.logger.error(
+        "ERROR: Deidentification policy defined for #{column} but column doesn't exist in #{self.class.table_name}"
+      )
       return
     end
 
