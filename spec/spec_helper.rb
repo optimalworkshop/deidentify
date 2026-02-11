@@ -50,8 +50,12 @@ RSpec.configure do |config|
   config.before(:each) do
     Bubble.deidentify_configuration = {}
     Bubble.associations_to_deidentify = []
+    Bubble.default_scopes = []
 
     Party.deidentify_configuration = {}
     Party.associations_to_deidentify = []
+    Party.default_scopes = []
+
+    Deidentify.configuration.scope = nil
   end
 end
