@@ -529,11 +529,11 @@ describe Deidentify do
 
       context 'with a default scope' do
         before do
-          Party.default_scopes = [-> { where('length(name) < 10') }]
-          Bubble.default_scopes = [-> { where('length(name) < 10') }]
+          Party.send(:default_scope, -> { where('length(name) < 10') })
+          Bubble.send(:default_scope, -> { where('length(name) < 10') })
 
           Deidentify.configure do |config|
-            config.scope = ->(klass_or_association) { klass_or_association.unscoped }
+            config.scope = lambda(&:unscoped)
           end
         end
 

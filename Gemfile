@@ -2,7 +2,11 @@
 
 source 'https://rubygems.org'
 
-gem 'rails', '~> 6.0.3.6'
+gem 'bigdecimal'
+gem 'drb'
+gem 'logger'
+gem 'mutex_m'
+gem 'rails', '~> 8.1.2'
 gem 'rspec'
 gem 'rubocop'
 gem 'rubocop-discourse'
