@@ -150,19 +150,35 @@ module Deidentify
       class_query = class_query(association.scope, configuration_scope, send(association_name))
 
       deidentify_many!(class_query)
+    elsif association.respond_to?(:polymorphic?) && association.polymorphic?
+      deidentify_polymorphic_belongs_to_with_scope!(association, configuration_scope)
     else
-      class_query = class_query(association.scope, configuration_scope, association.klass)
-
-      if association.has_one?
-        # eg. (bubble) has_one :party, -> { birthday }
-        # This will call configuration_scope.call(Party).merge(birthday).find_by(bubble_id: id)
-        deidentify_one!(class_query.find_by("#{association.foreign_key} = #{send(:id)}"))
-      else
-        # eg. belongs_to :party, -> { birthday }
-        # This will call configuration_scope.call(Party).merge(birthday).find_by(id: party_id)
-        deidentify_one!(class_query.find_by(id: send(association.foreign_key)))
-      end
+      deidentify_singular_with_scope!(association, configuration_scope)
     end
+  end
+
+  def deidentify_singular_with_scope!(association, configuration_scope)
+    class_query = class_query(association.scope, configuration_scope, association.klass)
+
+    if association.has_one?
+      # eg. (bubble) has_one :party, -> { birthday }
+      # This will call configuration_scope.call(Party).merge(birthday).find_by(bubble_id: id)
+      deidentify_one!(class_query.find_by("#{association.foreign_key} = #{send(:id)}"))
+    else
+      # eg. belongs_to :party, -> { birthday }
+      # This will call configuration_scope.call(Party).merge(birthday).find_by(id: party_id)
+      deidentify_one!(class_query.find_by(id: send(association.foreign_key)))
+    end
+  end
+
+  def deidentify_polymorphic_belongs_to_with_scope!(association, configuration_scope)
+    foreign_type = send(association.foreign_type)
+    foreign_key = send(association.foreign_key)
+    return if foreign_type.nil? || foreign_key.nil?
+
+    klass = foreign_type.constantize
+    class_query = class_query(association.scope, configuration_scope, klass)
+    deidentify_one!(class_query.find_by(id: foreign_key))
   end
 
   def class_query(association_scope, configuration_scope, klass_or_association)

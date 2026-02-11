@@ -230,6 +230,127 @@ describe Deidentify do
       end
     end
 
+    context 'polymorphic associations' do
+      let(:new_value) { 'deidentified' }
+
+      context 'polymorphic belongs_to without scope' do
+        before do
+          Comment.deidentify :body, method: :replace, new_value: new_value
+          Comment.deidentify_associations :commentable
+          Party.deidentify :name, method: :replace, new_value: new_value
+          Bubble.deidentify :colour, method: :replace, new_value: new_value
+        end
+
+        context 'when commentable is a Party' do
+          let(:party) { Party.create!(name: 'bob') }
+          let(:comment) { Comment.create!(body: 'hello', commentable: party) }
+
+          it 'deidentifies the polymorphic target' do
+            comment.deidentify!
+
+            expect(party.reload.name).to eq new_value
+            expect(comment.reload.body).to eq new_value
+          end
+        end
+
+        context 'when commentable is a Bubble' do
+          let(:bubble) { Bubble.create!(colour: 'red') }
+          let(:comment) { Comment.create!(body: 'hello', commentable: bubble) }
+
+          it 'deidentifies the polymorphic target' do
+            comment.deidentify!
+
+            expect(bubble.reload.colour).to eq new_value
+            expect(comment.reload.body).to eq new_value
+          end
+        end
+
+        context 'when commentable is nil' do
+          let(:comment) { Comment.create!(body: 'hello') }
+
+          it 'does not raise an error' do
+            expect { comment.deidentify! }.not_to raise_error
+          end
+        end
+      end
+
+      context 'has_many :as (inverse side of polymorphic)' do
+        let(:party) { Party.create!(name: 'bob') }
+        let(:comment) { Comment.create!(body: 'hello', commentable: party) }
+        let(:second_comment) { Comment.create!(body: 'world', commentable: party) }
+
+        before do
+          Party.deidentify_associations :comments
+          Comment.deidentify :body, method: :replace, new_value: new_value
+
+          comment
+          second_comment
+        end
+
+        it 'deidentifies all polymorphic children' do
+          party.deidentify!
+
+          expect(comment.reload.body).to eq new_value
+          expect(second_comment.reload.body).to eq new_value
+        end
+      end
+
+      context 'loop detection with polymorphic associations' do
+        let(:party) { Party.create!(name: 'bob') }
+        let(:comment) { Comment.create!(body: 'hello', commentable: party) }
+
+        before do
+          Comment.deidentify :body, method: :replace, new_value: new_value
+          Comment.deidentify_associations :commentable
+          Party.deidentify :name, method: :replace, new_value: new_value
+          Party.deidentify_associations :comments
+
+          comment
+        end
+
+        it 'does not loop forever' do
+          expect { party.deidentify! }.not_to raise_error
+
+          expect(comment.reload.body).to eq new_value
+          expect(party.reload.name).to eq new_value
+        end
+      end
+
+      context 'with a configuration scope' do
+        before do
+          Deidentify.configure do |config|
+            config.scope = ->(klass_or_association) { klass_or_association.where('name is null OR length(name) < 10') }
+          end
+
+          Comment.deidentify :body, method: :replace, new_value: new_value
+          Comment.deidentify_associations :commentable
+          Party.deidentify :name, method: :replace, new_value: new_value
+        end
+
+        context 'when scope includes the polymorphic target' do
+          let(:party) { Party.create!(name: 'four') }
+          let(:comment) { Comment.create!(body: 'hello', commentable: party) }
+
+          it 'deidentifies the target' do
+            comment.deidentify!
+
+            expect(party.reload.name).to eq new_value
+          end
+        end
+
+        context 'when scope excludes the polymorphic target' do
+          let(:party) { Party.create!(name: 'seventy-three') }
+          let(:comment) { Comment.create!(body: 'hello', commentable: party) }
+
+          it 'does not deidentify the target' do
+            comment.deidentify!
+
+            expect(party.reload.name).to eq 'seventy-three'
+          end
+        end
+      end
+    end
+
     context 'when a default scope is passed in via the configuration' do
       let(:new_value) { "it's deidentified" }
 
